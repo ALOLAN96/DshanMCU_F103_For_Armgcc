@@ -48,17 +48,17 @@
 /* USER CODE BEGIN Variables */
 
 /* USER CODE END Variables */
-/* Definitions for TaskOled */
-osThreadId_t TaskOledHandle;
-const osThreadAttr_t TaskOled_attributes = {
-  .name = "TaskOled",
+/* Definitions for taskOled */
+osThreadId_t taskOledHandle;
+const osThreadAttr_t taskOled_attributes = {
+  .name = "taskOled",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for TaskLed */
-osThreadId_t TaskLedHandle;
-const osThreadAttr_t TaskLed_attributes = {
-  .name = "TaskLed",
+/* Definitions for taskLed */
+osThreadId_t taskLedHandle;
+const osThreadAttr_t taskLed_attributes = {
+  .name = "taskLed",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
@@ -100,11 +100,11 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of TaskOled */
-  TaskOledHandle = osThreadNew(AppTaskOled, NULL, &TaskOled_attributes);
+  /* creation of taskOled */
+  taskOledHandle = osThreadNew(AppTaskOled, NULL, &taskOled_attributes);
 
-  /* creation of TaskLed */
-  TaskLedHandle = osThreadNew(AppTaskLed, NULL, &TaskLed_attributes);
+  /* creation of taskLed */
+  taskLedHandle = osThreadNew(AppTaskLed, NULL, &taskLed_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */
