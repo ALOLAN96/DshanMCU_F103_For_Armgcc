@@ -7,7 +7,7 @@
     "Core",
     "Drivers",
     "Middlewares",
-    "DshanMCU-F103"
+    "dshan_mcu_f103"
   ],
   "virtualFolder": {
     "name": "<virtual_root>",
@@ -23,7 +23,8 @@
   "targets": {
     "Debug": {
       "excludeList": [
-        "DshanMCU-F103/ascii_font.c"
+        "DshanMCU-F103/ascii_font.c",
+        "dshan_mcu_f103/ascii_font.c"
       ],
       "toolchain": "GCC",
       "compileConfig": {
@@ -74,7 +75,7 @@
           "Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM3",
           "Drivers/CMSIS/Device/ST/STM32F1xx/Include",
           "Drivers/CMSIS/Include",
-          "DshanMCU-F103"
+          "dshan_mcu_f103"
         ],
         "libList": [],
         "sourceDirList": [],
