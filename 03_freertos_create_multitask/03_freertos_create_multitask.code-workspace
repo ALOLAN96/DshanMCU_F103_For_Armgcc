@@ -1,0 +1,15 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "files.associations": {
+            "driver_lcd.h": "c",
+            "driver_oled.h": "c",
+            "driver_ir_receiver.h": "c"
+        }
+    },
+    "extensions": {}
+}
