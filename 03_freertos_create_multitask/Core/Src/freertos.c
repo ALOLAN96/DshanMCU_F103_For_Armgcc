@@ -51,170 +51,116 @@
 /* USER CODE BEGIN Variables */
 
 /* USER CODE END Variables */
-/* Definitions for taskOled */
-osThreadId_t taskOledHandle;
-const osThreadAttr_t taskOled_attributes = {
-  .name = "taskOled",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
-};
-/* Definitions for taskLed */
-osThreadId_t taskLedHandle;
-const osThreadAttr_t taskLed_attributes = {
-  .name = "taskLed",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
-};
-/* Definitions for taskColoerLed */
-osThreadId_t taskColoerLedHandle;
-const osThreadAttr_t taskColoerLed_attributes = {
-  .name = "taskColoerLed",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
-};
-/* Definitions for taskBuzzer */
-osThreadId_t taskBuzzerHandle;
-const osThreadAttr_t taskBuzzer_attributes = {
-  .name = "taskBuzzer",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+/* Definitions for startTask */
+osThreadId_t startTaskHandle;
+const osThreadAttr_t startTask_attributes = {
+    .name       = "startTask",
+    .stack_size = 128 * 4,
+    .priority   = (osPriority_t)osPriorityNormal,
 };
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
+void MUSIC_Analysis(void);
 
+void AppStartTask(void *argument);
 /* USER CODE END FunctionPrototypes */
 
-void AppTaskOled(void *argument);
-void AppTaskLed(void *argument);
-void AppTaskColoerLed(void *argument);
-void AppTaskBuzzer(void *argument);
+void TaskBuzzer(void *argument);
+void TaskLed(void *argument);
+void TaskColorLed(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /**
-  * @brief  FreeRTOS initialization
-  * @param  None
-  * @retval None
-  */
-void MX_FREERTOS_Init(void) {
-  /* USER CODE BEGIN Init */
+ * @brief  FreeRTOS initialization
+ * @param  None
+ * @retval None
+ */
+void MX_FREERTOS_Init(void)
+{
+    /* USER CODE BEGIN Init */
 
-  /* USER CODE END Init */
+    /* USER CODE END Init */
 
-  /* USER CODE BEGIN RTOS_MUTEX */
+    /* USER CODE BEGIN RTOS_MUTEX */
     /* add mutexes, ... */
-  /* USER CODE END RTOS_MUTEX */
+    /* USER CODE END RTOS_MUTEX */
 
-  /* USER CODE BEGIN RTOS_SEMAPHORES */
+    /* USER CODE BEGIN RTOS_SEMAPHORES */
     /* add semaphores, ... */
-  /* USER CODE END RTOS_SEMAPHORES */
+    /* USER CODE END RTOS_SEMAPHORES */
 
-  /* USER CODE BEGIN RTOS_TIMERS */
+    /* USER CODE BEGIN RTOS_TIMERS */
     /* start timers, add new ones, ... */
-  /* USER CODE END RTOS_TIMERS */
+    /* USER CODE END RTOS_TIMERS */
 
-  /* USER CODE BEGIN RTOS_QUEUES */
+    /* USER CODE BEGIN RTOS_QUEUES */
     /* add queues, ... */
-  /* USER CODE END RTOS_QUEUES */
+    /* USER CODE END RTOS_QUEUES */
 
-  /* Create the thread(s) */
-  /* creation of taskOled */
-  taskOledHandle = osThreadNew(AppTaskOled, NULL, &taskOled_attributes);
+    /* Create the thread(s) */
+    /* creation of startTask */
+    startTaskHandle = osThreadNew(AppStartTask, NULL, &startTask_attributes);
 
-  /* creation of taskLed */
-  taskLedHandle = osThreadNew(AppTaskLed, NULL, &taskLed_attributes);
-
-  /* creation of taskColoerLed */
-  taskColoerLedHandle = osThreadNew(AppTaskColoerLed, NULL, &taskColoerLed_attributes);
-
-  /* creation of taskBuzzer */
-  taskBuzzerHandle = osThreadNew(AppTaskBuzzer, NULL, &taskBuzzer_attributes);
-
-  /* USER CODE BEGIN RTOS_THREADS */
+    /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */
-  /* USER CODE END RTOS_THREADS */
+    /* USER CODE END RTOS_THREADS */
 
-  /* USER CODE BEGIN RTOS_EVENTS */
+    /* USER CODE BEGIN RTOS_EVENTS */
     /* add events, ... */
-  /* USER CODE END RTOS_EVENTS */
-
+    /* USER CODE END RTOS_EVENTS */
 }
 
-/* USER CODE BEGIN Header_AppTaskOled */
+/* USER CODE BEGIN Header_AppStartTask */
 /**
-  * @brief  Function implementing the TaskOled thread.
-  * @param  argument: Not used
-  * @retval None
-  */
-/* USER CODE END Header_AppTaskOled */
-void AppTaskOled(void *argument)
+ * @brief  Function implementing the startTask thread.
+ * @param  argument: Not used
+ * @retval None
+ */
+/* USER CODE END Header_AppStartTask */
+void AppStartTask(void *argument)
 {
-  /* USER CODE BEGIN AppTaskOled */
-  /* Infinite loop */
-  for(;;)
-  {
-      IRReceiver_Test();
-  }
-  /* USER CODE END AppTaskOled */
-}
+    /* USER CODE BEGIN AppStartTask */
+    TaskHandle_t xBuzzerTaskHandle, xOledTaskhandle, xLedTaskhandle;
 
-/* USER CODE BEGIN Header_AppTaskLed */
-/**
-* @brief Function implementing the TaskLed thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_AppTaskLed */
-void AppTaskLed(void *argument)
-{
-  /* USER CODE BEGIN AppTaskLed */
-  /* Infinite loop */
-  for(;;)
-  {
-      Led_Test();
-  }
-  /* USER CODE END AppTaskLed */
-}
+    /* 创建声任务 */
+    xTaskCreate(TaskBuzzer, "Buzzer Task", 128, NULL, osPriorityNormal, &xBuzzerTaskHandle);
 
-/* USER CODE BEGIN Header_AppTaskColoerLed */
-/**
-* @brief Function implementing the taskColoerLed thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_AppTaskColoerLed */
-void AppTaskColoerLed(void *argument)
-{
-  /* USER CODE BEGIN AppTaskColoerLed */
-  /* Infinite loop */
-  for(;;)
-  {
-      ColorLED_Test();
-  }
-  /* USER CODE END AppTaskColoerLed */
-}
+    /* 创建光任务 */
+    xTaskCreate(TaskLed, "Oled Task", 128, NULL, osPriorityNormal, &xOledTaskhandle);
 
-/* USER CODE BEGIN Header_AppTaskBuzzer */
-/**
-* @brief Function implementing the taskBuzzer thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_AppTaskBuzzer */
-void AppTaskBuzzer(void *argument)
-{
-  /* USER CODE BEGIN AppTaskBuzzer */
-  /* Infinite loop */
-  for(;;)
-  {
-      PassiveBuzzer_Test();
-  }
-  /* USER CODE END AppTaskBuzzer */
+    /* 创建色任务 */
+    xTaskCreate(TaskColorLed, "Led Task", 128, NULL, osPriorityNormal, &xLedTaskhandle);
+
+    /* Infinite loop */
+    for (;;) {
+        IRReceiver_Test();
+    }
+    /* USER CODE END AppStartTask */
 }
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
+void TaskBuzzer(void *argument)
+{
+    for (;;) {
+        MUSIC_Analysis();
+    }
+}
+
+void TaskLed(void *argument)
+{
+    for (;;) {
+        Led_Test();
+    }
+}
+
+void TaskColorLed(void *argument)
+{
+    for (;;) {
+        ColorLED_Test();
+    }
+}
 
 /* USER CODE END Application */
-

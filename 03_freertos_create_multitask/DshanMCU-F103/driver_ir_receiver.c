@@ -1,18 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- * Copyright (c) 2008-2023 100askTeam : Dongshan WEI <weidongshan@qq.com> 
+ * Copyright (c) 2008-2023 100askTeam : Dongshan WEI <weidongshan@qq.com>
  * Discourse:  https://forums.100ask.net
  */
 
- 
 /*  Copyright (C) 2008-2023 深圳百问网科技有限公司
  *  All rights reserved
  *
  *
  * 免责声明: 百问网编写的文档，仅供学员学习使用，可以转发或引用(请保留作者信息)，禁止用于商业用途！
  * 免责声明: 百问网编写的程序，可以用于商业用途，但百问网不承担任何后果！
- * 
- * 
+ *
+ *
  * 本程序遵循GPL V3协议，使用请遵循协议许可
  * 本程序所用的开发板：	DShanMCU-F103
  * 百问网嵌入式学习平台：https://www.100ask.net
@@ -22,13 +21,12 @@
  * 联系我们(E-mail)：	  weidongshan@qq.com
  *
  * 版权所有，盗版必究。
- *  
+ *
  * 修改历史     版本号           作者        修改内容
  *-----------------------------------------------------
  * 2023.08.04      v01         百问科技      创建文件
  *-----------------------------------------------------
  */
-
 
 #include "driver_ir_receiver.h"
 #include "driver_lcd.h"
@@ -44,7 +42,7 @@ static int g_KeysBuf_R, g_KeysBuf_W;
 static uint64_t g_IRReceiverIRQ_Timers[68];
 static int g_IRReceiverIRQ_Cnt = 0;
 
-#define NEXT_POS(x) ((x+1) % BUF_LEN)
+#define NEXT_POS(x) ((x + 1) % BUF_LEN)
 
 /* 辅助函数 */
 
@@ -60,7 +58,7 @@ static int g_IRReceiverIRQ_Cnt = 0;
  ***********************************************************************/
 static int isKeysBufEmpty(void)
 {
-	return (g_KeysBuf_R == g_KeysBuf_W);
+    return (g_KeysBuf_R == g_KeysBuf_W);
 }
 
 /**********************************************************************
@@ -75,7 +73,7 @@ static int isKeysBufEmpty(void)
  ***********************************************************************/
 static int isKeysBufFull(void)
 {
-	return (g_KeysBuf_R == NEXT_POS(g_KeysBuf_W));
+    return (g_KeysBuf_R == NEXT_POS(g_KeysBuf_W));
 }
 
 /**********************************************************************
@@ -90,11 +88,10 @@ static int isKeysBufFull(void)
  ***********************************************************************/
 static void PutKeyToBuf(unsigned char key)
 {
-	if (!isKeysBufFull())
-	{
-		g_KeysBuf[g_KeysBuf_W] = key;
-		g_KeysBuf_W = NEXT_POS(g_KeysBuf_W);
-	}
+    if (!isKeysBufFull()) {
+        g_KeysBuf[g_KeysBuf_W] = key;
+        g_KeysBuf_W            = NEXT_POS(g_KeysBuf_W);
+    }
 }
 
 /**********************************************************************
@@ -109,13 +106,12 @@ static void PutKeyToBuf(unsigned char key)
  ***********************************************************************/
 static unsigned char GetKeyFromBuf(void)
 {
-	unsigned char key = 0xff;
-	if (!isKeysBufEmpty())
-	{
-		key = g_KeysBuf[g_KeysBuf_R];
-		g_KeysBuf_R = NEXT_POS(g_KeysBuf_R);
-	}
-	return key;
+    unsigned char key = 0xff;
+    if (!isKeysBufEmpty()) {
+        key         = g_KeysBuf[g_KeysBuf_R];
+        g_KeysBuf_R = NEXT_POS(g_KeysBuf_R);
+    }
+    return key;
 }
 
 /**********************************************************************
@@ -130,62 +126,56 @@ static unsigned char GetKeyFromBuf(void)
  ***********************************************************************/
 static int IRReceiver_IRQTimes_Parse(void)
 {
-	uint64_t time;
-	int i;
-	int m, n;
-	unsigned char datas[4];
-	unsigned char data = 0;
-	int bits = 0;
-	int byte = 0;
+    uint64_t time;
+    int i;
+    int m, n;
+    unsigned char datas[4];
+    unsigned char data = 0;
+    int bits           = 0;
+    int byte           = 0;
 
-	/* 1. 判断前导码 : 9ms的低脉冲, 4.5ms高脉冲  */
-	time = g_IRReceiverIRQ_Timers[1] - g_IRReceiverIRQ_Timers[0];
-	if (time < 8000000 || time > 10000000)
-	{
-		return -1;
-	}
+    /* 1. 判断前导码 : 9ms的低脉冲, 4.5ms高脉冲  */
+    time = g_IRReceiverIRQ_Timers[1] - g_IRReceiverIRQ_Timers[0];
+    if (time < 8000000 || time > 10000000) {
+        return -1;
+    }
 
-	time = g_IRReceiverIRQ_Timers[2] - g_IRReceiverIRQ_Timers[1];
-	if (time < 3500000 || time > 55000000)
-	{
-		return -1;
-	}
+    time = g_IRReceiverIRQ_Timers[2] - g_IRReceiverIRQ_Timers[1];
+    if (time < 3500000 || time > 55000000) {
+        return -1;
+    }
 
-	/* 2. 解析数据 */
-	for (i = 0; i < 32; i++)
-	{
-		m = 3 + i*2;
-		n = m+1;
-		time = g_IRReceiverIRQ_Timers[n] - g_IRReceiverIRQ_Timers[m];
-		data <<= 1;
-		bits++;
-		if (time > 1000000)
-		{
-			/* 得到了数据1 */
-			data |= 1;
-		}
+    /* 2. 解析数据 */
+    for (i = 0; i < 32; i++) {
+        m    = 3 + i * 2;
+        n    = m + 1;
+        time = g_IRReceiverIRQ_Timers[n] - g_IRReceiverIRQ_Timers[m];
+        data <<= 1;
+        bits++;
+        if (time > 1000000) {
+            /* 得到了数据1 */
+            data |= 1;
+        }
 
-		if (bits == 8)
-		{
-			datas[byte] = data;
-			byte++;
-			data = 0;
-			bits = 0;
-		}
-	}
+        if (bits == 8) {
+            datas[byte] = data;
+            byte++;
+            data = 0;
+            bits = 0;
+        }
+    }
 
-	/* 判断数据正误 */
-	datas[1] = ~datas[1];
-	datas[3] = ~datas[3];
-	
-	if ((datas[0] != datas[1]) || (datas[2] != datas[3]))
-	{
+    /* 判断数据正误 */
+    datas[1] = ~datas[1];
+    datas[3] = ~datas[3];
+
+    if ((datas[0] != datas[1]) || (datas[2] != datas[3])) {
         g_IRReceiverIRQ_Cnt = 0;
         return -1;
-	}
+    }
 
-	PutKeyToBuf(datas[0]);
-	PutKeyToBuf(datas[2]);
+    PutKeyToBuf(datas[0]);
+    PutKeyToBuf(datas[2]);
     return 0;
 }
 
@@ -201,22 +191,20 @@ static int IRReceiver_IRQTimes_Parse(void)
  ***********************************************************************/
 static int isRepeatedKey(void)
 {
-	uint64_t time;
+    uint64_t time;
 
-	/* 1. 判断重复码 : 9ms的低脉冲, 2.25ms高脉冲  */
-	time = g_IRReceiverIRQ_Timers[1] - g_IRReceiverIRQ_Timers[0];
-	if (time < 8000000 || time > 10000000)
-	{
-		return 0;
-	}
+    /* 1. 判断重复码 : 9ms的低脉冲, 2.25ms高脉冲  */
+    time = g_IRReceiverIRQ_Timers[1] - g_IRReceiverIRQ_Timers[0];
+    if (time < 8000000 || time > 10000000) {
+        return 0;
+    }
 
-	time = g_IRReceiverIRQ_Timers[2] - g_IRReceiverIRQ_Timers[1];
-	if (time < 2000000 || time > 2500000)
-	{
-		return 0;
-	}	
+    time = g_IRReceiverIRQ_Timers[2] - g_IRReceiverIRQ_Timers[1];
+    if (time < 2000000 || time > 2500000) {
+        return 0;
+    }
 
-	return 1;
+    return 1;
 }
 
 /**********************************************************************
@@ -234,43 +222,37 @@ void IRReceiver_IRQ_Callback(void)
     uint64_t time;
     static uint64_t pre_time = 0;
 
-        
-	/* 1. 记录中断发生的时刻 */	
-	time = system_get_ns();
-    
+    /* 1. 记录中断发生的时刻 */
+    time = system_get_ns();
+
     /* 一次按键的最长数据 = 引导码 + 32个数据"1" = 9+4.5+2.25*32 = 85.5ms
      * 如果当前中断的时刻, 举例上次中断的时刻超过这个时间, 以前的数据就抛弃
      */
-    if (time - pre_time > 100000000) 
-    {
+    if (time - pre_time > 100000000) {
         g_IRReceiverIRQ_Cnt = 0;
     }
     pre_time = time;
-    
-	g_IRReceiverIRQ_Timers[g_IRReceiverIRQ_Cnt] = time;
 
-	/* 2. 累计中断次数 */
-	g_IRReceiverIRQ_Cnt++;
+    g_IRReceiverIRQ_Timers[g_IRReceiverIRQ_Cnt] = time;
 
-	/* 3. 次数达标后, 解析数据, 放入buffer */
-	if (g_IRReceiverIRQ_Cnt == 4)
-	{
-		/* 是否重复码 */
-		if (isRepeatedKey())
-		{
-			/* device: 0, val: 0, 表示重复码 */
-			PutKeyToBuf(0);
-			PutKeyToBuf(0);
-			g_IRReceiverIRQ_Cnt = 0;
-		}
-	}
-	if (g_IRReceiverIRQ_Cnt == 68)
-	{
-		IRReceiver_IRQTimes_Parse();
-		g_IRReceiverIRQ_Cnt = 0;
-	}
+    /* 2. 累计中断次数 */
+    g_IRReceiverIRQ_Cnt++;
+
+    /* 3. 次数达标后, 解析数据, 放入buffer */
+    if (g_IRReceiverIRQ_Cnt == 4) {
+        /* 是否重复码 */
+        if (isRepeatedKey()) {
+            /* device: 0, val: 0, 表示重复码 */
+            PutKeyToBuf(0);
+            PutKeyToBuf(0);
+            g_IRReceiverIRQ_Cnt = 0;
+        }
+    }
+    if (g_IRReceiverIRQ_Cnt == 68) {
+        IRReceiver_IRQTimes_Parse();
+        g_IRReceiverIRQ_Cnt = 0;
+    }
 }
-
 
 /**********************************************************************
  * 函数名称： IRReceiver_Init
@@ -309,7 +291,7 @@ int IRReceiver_Read(uint8_t *pDev, uint8_t *pData)
 {
     if (isKeysBufEmpty())
         return -1;
-    
+
     *pDev  = GetKeyFromBuf();
     *pData = GetKeyFromBuf();
     return 0;
@@ -327,24 +309,21 @@ int IRReceiver_Read(uint8_t *pDev, uint8_t *pData)
  ***********************************************************************/
 const char *IRReceiver_CodeToString(uint8_t code)
 {
-    const uint8_t codes[]= {0xa2, 0xe2, 0x22, 0x02, 0xc2, 0xe0, 0xa8, 0x90, \
-                            0x68, 0x98, 0xb0, 0x30, 0x18, 0x7a, 0x10, 0x38, \
-                            0x5a, 0x42, 0x4a, 0x52, 0x00};
-    const char *names[]= {"Power", "Menu", "Test", "+", "Return", "Left", "Play", "Right", \
-                            "0", "-", "C", "1", "2", "3", "4", "5", \
-                            "6", "7", "8", "9", "Repeat"};
+    const uint8_t codes[] = {0xa2, 0xe2, 0x22, 0x02, 0xc2, 0xe0, 0xa8, 0x90,
+                             0x68, 0x98, 0xb0, 0x30, 0x18, 0x7a, 0x10, 0x38,
+                             0x5a, 0x42, 0x4a, 0x52, 0x00};
+    const char *names[]   = {"Power", "Menu", "Test", "+", "Return", "Left", "Play", "Right",
+                             "0", "-", "C", "1", "2", "3", "4", "5",
+                             "6", "7", "8", "9", "Repeat"};
     int i;
-    
-    for (i = 0; i < sizeof(codes)/sizeof(codes[0]); i++)
-    {
-        if (code == codes[i])
-        {
+
+    for (i = 0; i < sizeof(codes) / sizeof(codes[0]); i++) {
+        if (code == codes[i]) {
             return names[i];
         }
     }
     return "Error";
 }
-
 
 /**********************************************************************
  * 函数名称： IRReceiver_Test
@@ -362,16 +341,15 @@ void IRReceiver_Test(void)
     uint8_t dev, data;
     int len;
 
+    LCD_Init();
     LCD_Clear();
     IRReceiver_Init();
 
-    while (1)
-    {
-        LCD_PrintString(0, 0, "IR Receiver: ");        
+    while (1) {
+        LCD_PrintString(0, 0, "IR Receiver: ");
         LCD_PrintString(0, 2, "Device  Data");
 
-        if (!IRReceiver_Read(&dev, &data))
-        {
+        if (!IRReceiver_Read(&dev, &data)) {
             LCD_PrintString(0, 4, "                ");
             LCD_PrintHex(0, 4, dev, 1);
             LCD_PrintHex(8, 4, data, 1);
@@ -381,4 +359,3 @@ void IRReceiver_Test(void)
         }
     }
 }
-
