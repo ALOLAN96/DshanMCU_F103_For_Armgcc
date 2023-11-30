@@ -167,12 +167,12 @@ void LcdPrintTask(void *argument)
     for (;;) {
         if (g_PrintFlag) {
             g_PrintFlag = 0;
-            len       = LCD_PrintString(pInfo->x, pInfo->y, pInfo->buff);
+            len         = LCD_PrintString(pInfo->x, pInfo->y, pInfo->buff);
             len += LCD_PrintString(len, pInfo->y, ":");
             LCD_PrintSignedVal(len, pInfo->y, cnt++);
             g_PrintFlag = 1;
         }
-        mdelay(500);
+        mdelay(500); // 此处延时是因为上述操作属于耗时操作，系统切换时大概率发生在上述语句
     }
 }
 /* USER CODE END Application */
