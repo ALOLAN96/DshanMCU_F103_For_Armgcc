@@ -26,7 +26,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "driver_led.h"
-#include "driver_ir_receiver.h"
+#include "driver_lcd.h"
+#include "driver_timer.h"
+#include "stdbool.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -46,7 +48,31 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
+typedef struct {
+    uint8_t x;
+    uint8_t y;
+    char buff[16];
+} TaskPrintfInfo;
 
+static TaskPrintfInfo g_Task1PrintInfo = {
+    .x    = 0,
+    .y    = 0,
+    .buff = "Task1",
+};
+
+static TaskPrintfInfo g_Task2PrintInfo = {
+    .x    = 0,
+    .y    = 3,
+    .buff = "Task2",
+};
+
+static TaskPrintfInfo g_Task3PrintInfo = {
+    .x    = 0,
+    .y    = 6,
+    .buff = "Task3",
+};
+
+static bool g_PrintFlag = 1; // 打印标志
 /* USER CODE END Variables */
 /* Definitions for startTask */
 osThreadId_t startTaskHandle;
@@ -58,9 +84,7 @@ const osThreadAttr_t startTask_attributes = {
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
-void AppTask1(void *argument);
-void AppTask2(void *argument);
-void AppTask3(void *argument);
+void LcdPrintTask(void *argument);
 /* USER CODE END FunctionPrototypes */
 
 void AppStartTask(void *argument);
@@ -75,7 +99,10 @@ void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 void MX_FREERTOS_Init(void)
 {
     /* USER CODE BEGIN Init */
-    TaskHandle_t AppTask1, AppTask2, AppTask3;
+    TaskHandle_t AppTask1Handle, AppTask2Handle, AppTask3Handle;
+
+    LCD_Init();
+    LCD_Clear();
     /* USER CODE END Init */
 
     /* USER CODE BEGIN RTOS_MUTEX */
@@ -99,9 +126,9 @@ void MX_FREERTOS_Init(void)
     startTaskHandle = osThreadNew(AppStartTask, NULL, &startTask_attributes);
 
     /* USER CODE BEGIN RTOS_THREADS */
-    // xTaskCreate(AppTask1, "Task1", 128, NULL, osPriorityNormal, &AppTask1);
-    // xTaskCreate(AppTask2, "Task2", 128, NULL, osPriorityNormal, &AppTask2);
-    // xTaskCreate(AppTask3, "Task3", 128, NULL, osPriorityNormal, &AppTask3);
+    xTaskCreate(LcdPrintTask, "Task1", 128, &g_Task1PrintInfo, osPriorityNormal, &AppTask1Handle);
+    xTaskCreate(LcdPrintTask, "Task2", 128, &g_Task2PrintInfo, osPriorityNormal, &AppTask2Handle);
+    xTaskCreate(LcdPrintTask, "Task3", 128, &g_Task3PrintInfo, osPriorityNormal, &AppTask3Handle);
 
     /* add threads, ... */
     /* USER CODE END RTOS_THREADS */
@@ -123,12 +150,29 @@ void AppStartTask(void *argument)
     /* USER CODE BEGIN AppStartTask */
     /* Infinite loop */
     for (;;) {
-        IRReceiver_Test();
+        Led_Test();
     }
     /* USER CODE END AppStartTask */
 }
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
+void LcdPrintTask(void *argument)
+{
+    TaskPrintfInfo *pInfo = (TaskPrintfInfo *)argument;
 
+    uint32_t cnt = 0;
+    int32_t len; // 记录打印长度
+
+    for (;;) {
+        if (g_PrintFlag) {
+            g_PrintFlag = 0;
+            len         = LCD_PrintString(pInfo->x, pInfo->y, pInfo->buff);
+            len += LCD_PrintString(len, pInfo->y, ":");
+            LCD_PrintSignedVal(len, pInfo->y, cnt++);
+            g_PrintFlag = 1;
+        }
+        mdelay(500); // 此处延时是因为上述操作属于耗时操作，系统切换时大概率发生在上述语句
+    }
+}
 /* USER CODE END Application */
