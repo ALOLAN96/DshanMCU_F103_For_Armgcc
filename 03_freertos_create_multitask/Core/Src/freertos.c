@@ -62,7 +62,6 @@ const osThreadAttr_t startTask_attributes = {
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 void MUSIC_Analysis(void);
-
 void AppStartTask(void *argument);
 /* USER CODE END FunctionPrototypes */
 
