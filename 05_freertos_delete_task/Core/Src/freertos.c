@@ -62,6 +62,7 @@ const osThreadAttr_t startTask_attributes = {
 /* USER CODE BEGIN FunctionPrototypes */
 void MUSIC_Analysis(void);
 void AppStartTask(void *argument);
+void PlayMusic(void *params);
 /* USER CODE END FunctionPrototypes */
 
 void TaskBuzzer(void *argument);
@@ -145,7 +146,7 @@ void AppStartTask(void *argument)
                 if (xBuzzerTaskHandle == NULL) {
                     LCD_ClearLine(0, 0);
                     LCD_PrintString(0, 0, "Create to Music");
-                    xTaskCreate((void (*)(void *))MUSIC_Analysis, "Buzzer Task", 128, NULL, osPriorityNormal, &xBuzzerTaskHandle);
+                    xTaskCreate((void (*)(void *))PlayMusic, "Buzzer Task", 128, NULL, osPriorityNormal, &xBuzzerTaskHandle);
                 }
             } else if (data == 0xa2u) {
                 if (xBuzzerTaskHandle != NULL) {
