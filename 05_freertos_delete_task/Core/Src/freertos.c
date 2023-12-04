@@ -146,7 +146,7 @@ void AppStartTask(void *argument)
                 if (xBuzzerTaskHandle == NULL) {
                     LCD_ClearLine(0, 0);
                     LCD_PrintString(0, 0, "Create to Music");
-                    xTaskCreate((void (*)(void *))PlayMusic, "Buzzer Task", 128, NULL, osPriorityNormal, &xBuzzerTaskHandle);
+                    xTaskCreate(PlayMusic, "Buzzer Task", 128, NULL, osPriorityNormal, &xBuzzerTaskHandle);
                 }
             } else if (data == 0xa2u) {
                 if (xBuzzerTaskHandle != NULL) {
