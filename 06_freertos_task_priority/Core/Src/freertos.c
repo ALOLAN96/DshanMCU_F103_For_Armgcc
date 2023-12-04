@@ -29,6 +29,7 @@
 #include "driver_lcd.h"
 #include "driver_passive_buzzer.h"
 #include "driver_ir_receiver.h"
+#include "music.c"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -62,6 +63,7 @@ const osThreadAttr_t startTask_attributes = {
 /* USER CODE BEGIN FunctionPrototypes */
 void MUSIC_Analysis(void);
 void AppStartTask(void *argument);
+void PlayMusic(void *params);
 /* USER CODE END FunctionPrototypes */
 
 void TaskBuzzer(void *argument);
@@ -145,7 +147,7 @@ void AppStartTask(void *argument)
                 if (xBuzzerTaskHandle == NULL) {
                     LCD_ClearLine(0, 0);
                     LCD_PrintString(0, 0, "Create to Music");
-                    xTaskCreate((void (*)(void *))MUSIC_Analysis, "Buzzer Task", 128, NULL, osPriorityNormal, &xBuzzerTaskHandle);
+                    xTaskCreate(PlayMusic, "Buzzer Task", 128, NULL, osPriorityAboveNormal1, &xBuzzerTaskHandle);
                 }
             } else if (data == 0xa2u) {
                 if (xBuzzerTaskHandle != NULL) {
@@ -171,6 +173,20 @@ void TaskLed(void *argument)
 {
     for (;;) {
         Led_Test();
+    }
+}
+
+void MUSIC_Analysis(void)
+{
+    uint16_t MusicBeatNum = ((((sizeof(Music_Lone_Brave)) / 2) / 3) - 1);
+
+    uint16_t MusicSpeed = Music_Lone_Brave[0][2];
+    for (uint16_t i = 1; i <= MusicBeatNum; i++) {
+        // BSP_Buzzer_SetFrequency(Tone_Index[Music_Lone_Brave[i][0]][Music_Lone_Brave[i][1]]);
+        PassiveBuzzer_Set_Freq_Duty(Tone_Index[Music_Lone_Brave[i][0]][Music_Lone_Brave[i][1]], 50);
+        // HAL_Delay(MusicSpeed/Music_Lone_Brave[i][2]);
+        // mdelay(MusicSpeed / Music_Lone_Brave[i][2]);
+        vTaskDelay(MusicSpeed / Music_Lone_Brave[i][2]);
     }
 }
 /* USER CODE END Application */

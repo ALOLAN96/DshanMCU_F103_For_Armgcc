@@ -1,0 +1,14 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "files.associations": {
+            "task.h": "c",
+            "freertos.h": "c"
+        }
+    },
+    "extensions": {}
+}

@@ -956,18 +956,7 @@ uint16_t Music_Lone_Brave[][3] = {
  * @Introduce  		ø™ º≤•∑≈“Ù¿÷
  * @Return 				NULL
  */
-void MUSIC_Analysis(void)
-{
-    uint16_t MusicBeatNum = ((((sizeof(Music_Lone_Brave)) / 2) / 3) - 1);
 
-    uint16_t MusicSpeed = Music_Lone_Brave[0][2];
-    for (uint16_t i = 1; i <= MusicBeatNum; i++) {
-        // BSP_Buzzer_SetFrequency(Tone_Index[Music_Lone_Brave[i][0]][Music_Lone_Brave[i][1]]);
-        PassiveBuzzer_Set_Freq_Duty(Tone_Index[Music_Lone_Brave[i][0]][Music_Lone_Brave[i][1]], 50);
-        // HAL_Delay(MusicSpeed/Music_Lone_Brave[i][2]);
-        mdelay(MusicSpeed / Music_Lone_Brave[i][2]);
-    }
-}
 
 /* USER CODE END FD */
 /************************ (C) COPYRIGHT Lesterbor *****END OF FILE****/
