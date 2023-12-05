@@ -22,8 +22,7 @@
   "targets": {
     "Debug": {
       "excludeList": [
-        "DshanMCU-F103/ascii_font.c",
-        "Core/Src/music.c"
+        "DshanMCU-F103/ascii_font.c"
       ],
       "toolchain": "GCC",
       "compileConfig": {
