@@ -29,7 +29,6 @@
 #include "driver_lcd.h"
 #include "driver_passive_buzzer.h"
 #include "driver_ir_receiver.h"
-#include "music.c"
 #include "stdbool.h"
 /* USER CODE END Includes */
 
@@ -192,17 +191,4 @@ void TaskLed(void *argument)
     }
 }
 
-void MUSIC_Analysis(void)
-{
-    uint16_t MusicBeatNum = ((((sizeof(Music_Lone_Brave)) / 2) / 3) - 1);
-
-    uint16_t MusicSpeed = Music_Lone_Brave[0][2];
-    for (uint16_t i = 1; i <= MusicBeatNum; i++) {
-        // BSP_Buzzer_SetFrequency(Tone_Index[Music_Lone_Brave[i][0]][Music_Lone_Brave[i][1]]);
-        PassiveBuzzer_Set_Freq_Duty(Tone_Index[Music_Lone_Brave[i][0]][Music_Lone_Brave[i][1]], 50);
-        // HAL_Delay(MusicSpeed/Music_Lone_Brave[i][2]);
-        // mdelay(MusicSpeed / Music_Lone_Brave[i][2]);
-        vTaskDelay(MusicSpeed / Music_Lone_Brave[i][2]);
-    }
-}
 /* USER CODE END Application */

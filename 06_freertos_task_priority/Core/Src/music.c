@@ -967,7 +967,7 @@ void MUSIC_Analysis(void)
         PassiveBuzzer_Set_Freq_Duty(Tone_Index[Music_Lone_Brave[i][0]][Music_Lone_Brave[i][1]], 50);
         // HAL_Delay(MusicSpeed/Music_Lone_Brave[i][2]);
         // mdelay(MusicSpeed / Music_Lone_Brave[i][2]);
-        vTaskDelay(MusicSpeed / Music_Lone_Brave[i][2]);
+        vTaskDelay(pdMS_TO_TICKS(MusicSpeed / Music_Lone_Brave[i][2]));
     }
 }
 

@@ -30,7 +30,6 @@
 
 #include "driver_led.h"
 #include "gpio.h"
-
 #include "FreeRTOS.h"
 #include "task.h"
 
