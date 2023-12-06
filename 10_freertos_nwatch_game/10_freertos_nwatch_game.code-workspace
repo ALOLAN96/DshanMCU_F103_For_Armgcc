@@ -6,9 +6,8 @@
     ],
     "settings": {
         "files.associations": {
-            "freertos.h": "c"
-        },
-        "cortex-debug.variableUseNaturalFormat": true
+            "driver_lcd.h": "c"
+        }
     },
     "extensions": {}
 }

@@ -1,52 +1,79 @@
+## STM32¿ª·¢»·¾³ËµÃ÷£º
 
+### Ê¹ÓÃ¹¤¾ß£º
 
-## STM32å¼€å‘ç¯å¢ƒè¯´æ˜ï¼š
+#### MCU£ºSTM32F103C8T6
 
-### ä½¿ç”¨å·¥å…·ï¼š
+#### CubeMX£ºV6.9.2
 
-#### MCUï¼šSTM32F103C8T6
+#### VSCode£º°²×°EIDE²å¼ş ÆäÖĞ¼¯³ÉÁË±àÒë¡¢ÏÂÔØ¡¢µ÷ÊÔµÈ¶îÍâ¿ª·¢²å¼ş
 
-#### CubeMXï¼šV6.9.2
+#### ½»²æ±àÒë¹¤¾ßÁ´£º(GNU Arm Embedded Toolchain 10-2020-q4-major) 10.2.1 20201103 (release)
 
-#### VSCodeï¼šå®‰è£…EIDEæ’ä»¶ å…¶ä¸­é›†æˆäº†ç¼–è¯‘ã€ä¸‹è½½ã€è°ƒè¯•ç­‰é¢å¤–å¼€å‘æ’ä»¶
+### ¾ßÌåÊ¹ÓÃ²½ÖèËµÃ÷£º
 
-#### äº¤å‰ç¼–è¯‘å·¥å…·é“¾ï¼š(GNU Arm Embedded Toolchain 10-2020-q4-major) 10.2.1 20201103 (release)
+#### ¿ª·¢Á÷³ÌËµÃ÷£ºhttp://t.csdnimg.cn/COQKi
 
-### å…·ä½“ä½¿ç”¨æ­¥éª¤è¯´æ˜ï¼š
-
-#### å¼€å‘æµç¨‹è¯´æ˜ï¼šhttp://t.csdnimg.cn/COQKi
-
-#### EIDEä½¿ç”¨è®ºå›ï¼š[Embedded IDE Forum (em-ide.com)](https://discuss.em-ide.com/)
+#### EIDEÊ¹ÓÃÂÛÌ³£º[Embedded IDE Forum (em-ide.com)](https://discuss.em-ide.com/)
 
 
 
 
 
-## é¡¹ç›®å·¥ç¨‹æ–‡ä»¶å¤¹è¯´æ˜
+## ÏîÄ¿¹¤³ÌÎÄ¼ş¼ĞËµÃ÷
 
 ### 01_freertos_template
 
-ä¸€ä¸ªä½¿ç”¨CubeMXåˆå§‹åŒ–STM32F103C8T6ç›¸å…³å¤–è®¾çš„æ¨¡æ¿å·¥ç¨‹
+Ò»¸öÊ¹ÓÃCubeMX³õÊ¼»¯STM32F103C8T6Ïà¹ØÍâÉèµÄÄ£°å¹¤³Ì
 
 ### 02_freertos_create_the_first_multitask
 
-åˆ›å»ºç¬¬ä¸€ä¸ªå¤šä»»åŠ¡å·¥ç¨‹
-
-```
-
-```
-
-
+Ê¹ÓÃCubeMX¿ªÆô¶àÈÎÎñ
 
 ### 03_freertos_create_multitask
 
+Ê¹ÓÃxTaskCreate/xTaskCreateStaticÊÖ¶¯´´½¨¶àÈÎÎñ
 
+```C
+BaseType_t xTaskCreate ( TaskFunction_t pxTaskCode, // º¯ÊıÖ¸Õë, ÈÎÎñº¯Êı
+                        const char * const pcName, // ÈÎÎñµÄÃû×Ö
+                        const configSTACK_DEPTH_TYPE usStackDepth, // Õ»´óĞ¡,µ¥Î»Îªword,10±íÊ¾40×Ö½Ú
+                        void * const pvParameters, // µ÷ÓÃÈÎÎñº¯ÊıÊ±´«ÈëµÄ²ÎÊı
+                        UBaseType_t uxPriority,    // ÓÅÏÈ¼¶
+                        TaskHandle_t * const pxCreatedTask ); // ÈÎÎñ¾ä±ú, ÒÔºóÊ¹ÓÃËüÀ´²Ù×÷Õâ¸öÈÎÎñ
+```
+
+|   **²ÎÊı**    | **ÃèÊö**                                                     |
+| :-----------: | :----------------------------------------------------------- |
+|  pvTaskCode   | º¯ÊıÖ¸Õë£¬ÈÎÎñ¶ÔÓ¦µÄ C º¯Êı¡£ÈÎÎñÓ¦¸ÃÓÀÔ¶²»ÍË³ö£¬»òÕßÔÚÍË³öÊ±µ÷ÓÃ "vTaskDelete(NULL)"¡£ |
+|    pcName     | ÈÎÎñµÄÃû³Æ£¬½öÓÃÓÚµ÷ÊÔÄ¿µÄ£¬FreeRTOS ÄÚ²¿²»Ê¹ÓÃ¡£pcName µÄ³¤¶ÈÎª configMAX_TASK_NAME_LEN |
+| usStackDepth  | Ã¿¸öÈÎÎñ¶¼ÓĞ×Ô¼ºµÄÕ»£¬usStackDepth Ö¸¶¨ÁËÕ»µÄ´óĞ¡£¬µ¥Î»Îª word¡£ÀıÈç£¬Èç¹û´«Èë 100£¬±íÊ¾Õ»µÄ´óĞ¡Îª 100 word£¬¼´ 400 ×Ö½Ú¡£×î´óÖµÎª uint16_t µÄ×î´óÖµ¡£È·¶¨Õ»µÄ´óĞ¡²¢²»ÈİÒ×£¬Í¨³£ÊÇ¸ù¾İ¹À¼ÆÀ´Éè¶¨¡£¾«È·µÄ°ì·¨ÊÇ²é¿´·´»ã±à´úÂë¡£ |
+| pvParameters  | µ÷ÓÃ pvTaskCode º¯ÊıÖ¸ÕëÊ±Ê¹ÓÃµÄ²ÎÊı£ºpvTaskCode(pvParameters)¡£ |
+|  uxPriority   | ÈÎÎñµÄÓÅÏÈ¼¶·¶Î§Îª 0~(configMAX_PRIORITIES ¨C 1)¡£ÊıÖµÔ½Ğ¡£¬ÓÅÏÈ¼¶Ô½µÍ¡£Èç¹û´«ÈëµÄÖµ¹ı´ó£¬xTaskCreate »á½«Æäµ÷ÕûÎª (configMAX_PRIORITIES ¨C 1)¡£ |
+| pxCreatedTask | ÓÃÓÚ±£´æ xTaskCreate µÄÊä³ö½á¹û£¬¼´ÈÎÎñµÄ¾ä±ú£¨task handle£©¡£Èç¹ûÒÔºóĞèÒª¶Ô¸ÃÈÎÎñ½øĞĞ²Ù×÷£¬ÈçĞŞ¸ÄÓÅÏÈ¼¶£¬ÔòĞèÒªÊ¹ÓÃ´Ë¾ä±ú¡£Èç¹û²»ĞèÒªÊ¹ÓÃ¸Ã¾ä±ú£¬¿ÉÒÔ´«Èë NULL¡£ |
+
+```c
+TaskHandle_t xTaskCreateStatic ( TaskFunction_t pxTaskCode,   // º¯ÊıÖ¸Õë, ÈÎÎñº¯Êı
+                                 const char * const pcName,   // ÈÎÎñµÄÃû×Ö
+                                 const uint32_t ulStackDepth, // Õ»´óĞ¡,µ¥Î»Îªword,10±íÊ¾40×Ö½Ú
+                                 void * const pvParameters,   // µ÷ÓÃÈÎÎñº¯ÊıÊ±´«ÈëµÄ²ÎÊı
+                                 UBaseType_t uxPriority,      // ÓÅÏÈ¼¶
+                                 StackType_t * const puxStackBuffer, // ¾²Ì¬·ÖÅäµÄÕ»£¬¾ÍÊÇÒ»¸öbuffer
+                                 StaticTask_t * const pxTaskBuffer );// ¾²Ì¬·ÖÅäµÄÈÎÎñ½á¹¹ÌåµÄÖ¸Õë£¬ÓÃËüÀ´²Ù×÷Õâ¸öÈÎÎñ
+```
 
 ### 04_freertos_create_multitask_with_para
 
-ä½¿ç”¨ç»“æ„ä½“ä¼ å‚ç»™
+Ê¹ÓÃ½á¹¹Ìå´«µİ²ÎÊı
 
 ### 05_freertos_delete_task
+
+Ê¹ÓÃvTaskDeleteÉ¾³ıÈÎÎñ
+
+```c
+void vTaskDelete ( TaskHandle_t xTaskToDelete );
+NULL£º
+```
 
 
 
