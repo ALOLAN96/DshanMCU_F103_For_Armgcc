@@ -12,8 +12,9 @@
 #include "cmsis_os.h"
 #include "FreeRTOS.h"     // ARM.FreeRTOS::RTOS:Core
 #include "task.h"         // ARM.FreeRTOS::RTOS:Core
+#include "queue.h"        // ARM.FreeRTOS::RTOS:Queue
 #include "event_groups.h" // ARM.FreeRTOS::RTOS:Event Groups
-#include "semphr.h"       // ARM.FreeRTOS::RTOS:Core
+#include "semphr.h"       // ARM.FreeRTOS::RTOS:Semphr
 
 #include "draw.h"
 #include "resources.h"
@@ -99,11 +100,25 @@ static byte platformX;
 static uint32_t g_xres, g_yres, g_bpp;
 static uint8_t *g_framebuffer;
 
+QueueHandle_t g_xQueuePlatform; /* 挡球板的消息队列 */
+QueueHandle_t g_xQueueRotary;   /* 旋转编码器的消息队列 */
+
+typedef struct {
+    uint32_t dev;
+    uint32_t val;
+} IrRecvData; // 红外接收器消息队列item
+
+typedef struct {
+    int32_t cnt;
+    int32_t speed;
+} RotaryRecvData; // 旋转编码器消息队列item
+
 /* 挡球板任务 */
 static void platform_task(void *params)
 {
     byte platformXtmp = platformX;
     uint8_t dev, data, last_data;
+    IrRecvData irRecvData;
 
     // Draw platform
     draw_bitmap(platformXtmp, g_yres - 8, platform, 12, 8, NOINVERT, 0);
@@ -111,7 +126,13 @@ static void platform_task(void *params)
 
     while (1) {
         /* 读取红外遥控器 */
-        if (0 == IRReceiver_Read(&dev, &data)) {
+        // if (0 == IRReceiver_Read(&dev, &data))
+
+        // 从消息队列中拿取消息，拿不到就阻塞
+        xQueueReceive(g_xQueuePlatform, &irRecvData, portMAX_DELAY);
+        data = irRecvData.val;
+
+        {
             if (data == 0x00) /* Repeat */
             {
                 data = last_data;
@@ -156,11 +177,13 @@ static void platform_task(void *params)
 
 void game1_task(void *params)
 {
-    uint8_t dev, data, last_data;
-
     g_framebuffer = LCD_GetFrameBuffer(&g_xres, &g_yres, &g_bpp);
     draw_init();
     draw_end();
+
+    // 创建2个消息队列，用于任务间通信 创建一个
+    g_xQueuePlatform = xQueueCreate(10u, sizeof(IrRecvData)); // 创建挡球板消息队列
+    g_xQueueRotary   = xQueueCreate(10u, sizeof(RotaryRecvData));
 
     uptMove = UPT_MOVE_NONE;
 
