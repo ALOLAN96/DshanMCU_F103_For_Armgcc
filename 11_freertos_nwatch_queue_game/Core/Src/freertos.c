@@ -28,6 +28,7 @@
 #include "driver_ir_receiver.h"
 #include "driver_lcd.h"
 #include "game1.h"
+#include "typedefs.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -60,6 +61,7 @@ const osThreadAttr_t startTask_attributes = {
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 void game1_task(void *argument);
+extern void MUSIC_Analysis(void);
 /* USER CODE END FunctionPrototypes */
 
 void AppStartTask(void *argument);
@@ -101,7 +103,7 @@ void MX_FREERTOS_Init(void)
 
     /* Create the thread(s) */
     /* creation of startTask */
-    // startTaskHandle = osThreadNew(AppStartTask, NULL, &startTask_attributes);
+    startTaskHandle = osThreadNew(AppStartTask, NULL, &startTask_attributes);
 
     /* USER CODE BEGIN RTOS_THREADS */
     xTaskCreate(game1_task, "Game Task", 128, NULL, osPriorityNormal, &Game1TaskHandle);
@@ -125,7 +127,7 @@ void AppStartTask(void *argument)
     /* USER CODE BEGIN AppStartTask */
     /* Infinite loop */
     for (;;) {
-        osDelay(1u);
+        MUSIC_Analysis();
     }
     /* USER CODE END AppStartTask */
 }

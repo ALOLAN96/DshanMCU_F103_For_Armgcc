@@ -11,7 +11,8 @@
             "stm32f1xx_hal.h": "c",
             "stdint.h": "c",
             "cstdint": "c",
-            "driver_ir_receiver.h": "c"
+            "driver_ir_receiver.h": "c",
+            "draw.h": "c"
         }
     },
     "extensions": {}
