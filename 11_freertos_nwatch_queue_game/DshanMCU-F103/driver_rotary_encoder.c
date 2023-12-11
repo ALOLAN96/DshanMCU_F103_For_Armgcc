@@ -1,31 +1,35 @@
 /*  Copyright (s) 2019 深圳百问网科技有限公司
  *  All rights reserved
- * 
+ *
  * 文件名称：driver_rotary_encoder.c
  * 摘要：
- *  
+ *
  * 修改历史     版本号        Author       修改内容
  *--------------------------------------------------
  * 2023.08.05      v01         百问科技      创建文件
  *--------------------------------------------------
-*/
+ */
 
 #include "driver_rotary_encoder.h"
 #include "driver_lcd.h"
 #include "driver_timer.h"
 #include "stm32f1xx_hal.h"
 #include "tim.h"
+#include "typedefs.h"
+
+extern QueueHandle_t g_xQueueRotary; /* 旋转编码器队列 */
 
 /*
  * PB12 - S1
  * PB0  - S2
  * PB1  - Key
  */
-#define ROTARY_ENCODER_S1_GPIO_GROUP GPIOB
-#define ROTARY_ENCODER_S1_GPIO_PIN   GPIO_PIN_12
 
-#define ROTARY_ENCODER_S2_GPIO_GROUP GPIOB
-#define ROTARY_ENCODER_S2_GPIO_PIN   GPIO_PIN_0
+#define ROTARY_ENCODER_S1_GPIO_GROUP  GPIOB
+#define ROTARY_ENCODER_S1_GPIO_PIN    GPIO_PIN_12
+
+#define ROTARY_ENCODER_S2_GPIO_GROUP  GPIOB
+#define ROTARY_ENCODER_S2_GPIO_PIN    GPIO_PIN_0
 
 #define ROTARY_ENCODER_KEY_GPIO_GROUP GPIOB
 #define ROTARY_ENCODER_KEY_GPIO_PIN   GPIO_PIN_1
@@ -87,7 +91,6 @@ static int RotaryEncoder_Get_S2(void)
         return 1;
 }
 
-
 /**********************************************************************
  * 函数名称： RotaryEncoder_IRQ_Callback
  * 功能描述： 旋转编码器的中断回调函数
@@ -102,11 +105,12 @@ void RotaryEncoder_IRQ_Callback(void)
 {
     uint64_t time;
     static uint64_t pre_time = 0;
-        
-	/* 1. 记录中断发生的时刻 */	
-	time = system_get_ns();
+    RotaryRecvData rotaryRecvData;
 
-    /* 上升沿触发: 必定是高电平 
+    /* 1. 记录中断发生的时刻 */
+    time = system_get_ns();
+
+    /* 上升沿触发: 必定是高电平
      * 防抖
      */
     mdelay(2);
@@ -116,20 +120,20 @@ void RotaryEncoder_IRQ_Callback(void)
     /* S1上升沿触发中断
      * S2为0表示逆时针转, 为1表示顺时针转
      */
-    g_speed = (uint64_t)1000000000/(time - pre_time);
-    if (RotaryEncoder_Get_S2())
-    {
+    g_speed = (uint64_t)1000000000 / (time - pre_time);
+    if (RotaryEncoder_Get_S2()) {
         g_count++;
-    }
-    else
-    {
+    } else {
         g_count--;
         g_speed = 0 - g_speed;
     }
     pre_time = time;
-        
-}
 
+    /* 写队列 */
+    rotaryRecvData.cnt = g_count;
+    rotaryRecvData.speed = g_speed;
+    xQueueSendFromISR(g_xQueueRotary, &rotaryRecvData, NULL);
+}
 
 /**********************************************************************
  * 函数名称： RotaryEncoder_Init
@@ -151,7 +155,7 @@ void RotaryEncoder_Init(void)
  * 函数名称： RotaryEncoder_Write
  * 功能描述： 旋转编码器的读取函数
  * 输入参数： 无
- * 输出参数： pCnt   - 用于保存计数值 
+ * 输出参数： pCnt   - 用于保存计数值
  *            pSpeed - 用于保存速度(正数表示顺时针旋转,负数表示逆时针旋转,单位:每秒转动次数)
  *            pKey   - 用于保存按键状态(1-按键被按下, 0-按键被松开)
  * 返 回 值： 无
@@ -162,7 +166,7 @@ void RotaryEncoder_Init(void)
 void RotaryEncoder_Read(int32_t *pCnt, int32_t *pSpeed, int32_t *pKey)
 {
     static int32_t pre_count = 0;
-    *pCnt = g_count;
+    *pCnt                    = g_count;
 
     if (g_count == pre_count)
         *pSpeed = 0;
@@ -170,10 +174,9 @@ void RotaryEncoder_Read(int32_t *pCnt, int32_t *pSpeed, int32_t *pKey)
         *pSpeed = g_speed;
 
     pre_count = g_count;
-    
+
     *pKey = RotaryEncoder_Get_Key();
 }
-
 
 /**********************************************************************
  * 函数名称： RotaryEncoder_Test
@@ -190,11 +193,10 @@ void RotaryEncoder_Test(void)
 {
     int32_t count, speed, key;
     int len;
-    
+
     RotaryEncoder_Init();
 
-    while (1)
-    {
+    while (1) {
         LCD_PrintString(0, 0, "RotaryEncoder: ");
 
         RotaryEncoder_Read(&count, &speed, &key);
@@ -202,15 +204,13 @@ void RotaryEncoder_Test(void)
         len = LCD_PrintString(0, 2, "Cnt  : ");
         len += LCD_PrintSignedVal(len, 2, count);
         LCD_ClearLine(len, 2);
-        
+
         len = LCD_PrintString(0, 4, "Speed: ");
         len += LCD_PrintSignedVal(len, 4, speed);
         LCD_ClearLine(len, 4);
-        
+
         len = LCD_PrintString(0, 6, "Key  : ");
-        len += LCD_PrintString(len, 6, key ? "Pressed":"Released");
+        len += LCD_PrintString(len, 6, key ? "Pressed" : "Released");
         LCD_ClearLine(len, 6);
     }
 }
-
-

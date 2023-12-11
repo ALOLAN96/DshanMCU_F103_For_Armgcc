@@ -1,9 +1,8 @@
 {
-  "name": "04_freertos_create_multitask_with_para",
+  "name": "09_freertos_task_delay",
   "type": "ARM",
   "dependenceList": [],
   "srcDirs": [
-    ".eide/deps",
     "Core",
     "Drivers",
     "DshanMCU-F103",

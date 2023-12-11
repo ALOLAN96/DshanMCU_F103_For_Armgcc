@@ -13,7 +13,7 @@
             "cStandard": "c17",
             "cppStandard": "gnu++14",
             "intelliSenseMode": "windows-gcc-arm",
-            "compilerPath": "C:\\\\Users\\\\ALO_LAN\\\\.eide\\\\tools\\\\gcc_arm\\\\bin\\\\arm-none-eabi-gcc.exe"
+            "compilerPath": "C:\\Users\\admin\\.eide\\tools\\gcc_arm\\bin\\arm-none-eabi-gcc.exe"
         }
     ],
     "version": 4

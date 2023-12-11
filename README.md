@@ -1,78 +1,82 @@
-## STM32¿ª·¢»·¾³ËµÃ÷£º
+## STM32å¼€å‘ç¯å¢ƒè¯´æ˜ï¼š
 
-### Ê¹ÓÃ¹¤¾ß£º
+### ä½¿ç”¨å·¥å…·ï¼š
 
-#### MCU£ºSTM32F103C8T6
+#### MCUï¼šSTM32F103C8T6
 
-#### CubeMX£ºV6.9.2
+â€‹          Arm Cortex-M3 MCU with 64 Kbytes of  Flash memory, 72 MHz CPU
 
-#### VSCode£º°²×°EIDE²å¼ş ÆäÖĞ¼¯³ÉÁË±àÒë¡¢ÏÂÔØ¡¢µ÷ÊÔµÈ¶îÍâ¿ª·¢²å¼ş
+#### CubeMXï¼šV6.9.2
 
-#### ½»²æ±àÒë¹¤¾ßÁ´£º(GNU Arm Embedded Toolchain 10-2020-q4-major) 10.2.1 20201103 (release)
+#### VSCodeï¼šå®‰è£…EIDEæ’ä»¶ å…¶ä¸­é›†æˆäº†ç¼–è¯‘ã€ä¸‹è½½ã€è°ƒè¯•ç­‰é¢å¤–å¼€å‘æ’ä»¶
 
-### ¾ßÌåÊ¹ÓÃ²½ÖèËµÃ÷£º
+#### äº¤å‰ç¼–è¯‘å·¥å…·é“¾ï¼š(GNU Arm Embedded Toolchain 10-2020-q4-major) 10.2.1 20201103 (release)
 
-#### ¿ª·¢Á÷³ÌËµÃ÷£ºhttp://t.csdnimg.cn/COQKi
+#### ä¸‹è½½ï¼šSTM32CubeProgrammer v2.8.0 
 
-#### EIDEÊ¹ÓÃÂÛÌ³£º[Embedded IDE Forum (em-ide.com)](https://discuss.em-ide.com/)
+#### è°ƒè¯•ï¼šopenocd
+
+### å…·ä½“ä½¿ç”¨æ­¥éª¤è¯´æ˜ï¼š
+
+#### å¼€å‘æµç¨‹è¯´æ˜ï¼šhttp://t.csdnimg.cn/COQKi
+
+#### EIDEä½¿ç”¨è®ºå›ï¼š[Embedded IDE Forum (em-ide.com)](https://discuss.em-ide.com/)
 
 
 
-
-
-## ÏîÄ¿¹¤³ÌÎÄ¼ş¼ĞËµÃ÷
+## é¡¹ç›®å·¥ç¨‹æ–‡ä»¶å¤¹è¯´æ˜
 
 ### 01_freertos_template
 
-Ò»¸öÊ¹ÓÃCubeMX³õÊ¼»¯STM32F103C8T6Ïà¹ØÍâÉèµÄÄ£°å¹¤³Ì
+ä¸€ä¸ªä½¿ç”¨CubeMXåˆå§‹åŒ–STM32F103C8T6ç›¸å…³å¤–è®¾çš„æ¨¡æ¿å·¥ç¨‹ï¼Œé‡Œé¢åŒ…å«äº†ç›¸å…³å¤–è®¾é©±åŠ¨çš„ä»£ç 
 
 ### 02_freertos_create_the_first_multitask
 
-Ê¹ÓÃCubeMX¿ªÆô¶àÈÎÎñ
+ä½¿ç”¨CubeMXé€šè¿‡CMSISæ¥å£å¼€å¯å¤šä»»åŠ¡
 
 ### 03_freertos_create_multitask
 
-Ê¹ÓÃxTaskCreate/xTaskCreateStaticÊÖ¶¯´´½¨¶àÈÎÎñ
+ä½¿ç”¨xTaskCreate/xTaskCreateStaticæ‰‹åŠ¨åˆ›å»ºå¤šä»»åŠ¡
 
 ```C
-BaseType_t xTaskCreate ( TaskFunction_t pxTaskCode, // º¯ÊıÖ¸Õë, ÈÎÎñº¯Êı
-                        const char * const pcName, // ÈÎÎñµÄÃû×Ö
-                        const configSTACK_DEPTH_TYPE usStackDepth, // Õ»´óĞ¡,µ¥Î»Îªword,10±íÊ¾40×Ö½Ú
-                        void * const pvParameters, // µ÷ÓÃÈÎÎñº¯ÊıÊ±´«ÈëµÄ²ÎÊı
-                        UBaseType_t uxPriority,    // ÓÅÏÈ¼¶
-                        TaskHandle_t * const pxCreatedTask ); // ÈÎÎñ¾ä±ú, ÒÔºóÊ¹ÓÃËüÀ´²Ù×÷Õâ¸öÈÎÎñ
+BaseType_t xTaskCreate ( TaskFunction_t pxTaskCode, // å‡½æ•°æŒ‡é’ˆ, ä»»åŠ¡å‡½æ•°
+                        const char * const pcName, // ä»»åŠ¡çš„åå­—
+                        const configSTACK_DEPTH_TYPE usStackDepth, // æ ˆå¤§å°,å•ä½ä¸ºword,10è¡¨ç¤º40å­—èŠ‚
+                        void * const pvParameters, // è°ƒç”¨ä»»åŠ¡å‡½æ•°æ—¶ä¼ å…¥çš„å‚æ•°
+                        UBaseType_t uxPriority,    // ä¼˜å…ˆçº§
+                        TaskHandle_t * const pxCreatedTask ); // ä»»åŠ¡å¥æŸ„, ä»¥åä½¿ç”¨å®ƒæ¥æ“ä½œè¿™ä¸ªä»»åŠ¡
 ```
 
-|   **²ÎÊı**    | **ÃèÊö**                                                     |
+|   **å‚æ•°**    | **æè¿°**                                                     |
 | :-----------: | :----------------------------------------------------------- |
-|  pvTaskCode   | º¯ÊıÖ¸Õë£¬ÈÎÎñ¶ÔÓ¦µÄ C º¯Êı¡£ÈÎÎñÓ¦¸ÃÓÀÔ¶²»ÍË³ö£¬»òÕßÔÚÍË³öÊ±µ÷ÓÃ "vTaskDelete(NULL)"¡£ |
-|    pcName     | ÈÎÎñµÄÃû³Æ£¬½öÓÃÓÚµ÷ÊÔÄ¿µÄ£¬FreeRTOS ÄÚ²¿²»Ê¹ÓÃ¡£pcName µÄ³¤¶ÈÎª configMAX_TASK_NAME_LEN |
-| usStackDepth  | Ã¿¸öÈÎÎñ¶¼ÓĞ×Ô¼ºµÄÕ»£¬usStackDepth Ö¸¶¨ÁËÕ»µÄ´óĞ¡£¬µ¥Î»Îª word¡£ÀıÈç£¬Èç¹û´«Èë 100£¬±íÊ¾Õ»µÄ´óĞ¡Îª 100 word£¬¼´ 400 ×Ö½Ú¡£×î´óÖµÎª uint16_t µÄ×î´óÖµ¡£È·¶¨Õ»µÄ´óĞ¡²¢²»ÈİÒ×£¬Í¨³£ÊÇ¸ù¾İ¹À¼ÆÀ´Éè¶¨¡£¾«È·µÄ°ì·¨ÊÇ²é¿´·´»ã±à´úÂë¡£ |
-| pvParameters  | µ÷ÓÃ pvTaskCode º¯ÊıÖ¸ÕëÊ±Ê¹ÓÃµÄ²ÎÊı£ºpvTaskCode(pvParameters)¡£ |
-|  uxPriority   | ÈÎÎñµÄÓÅÏÈ¼¶·¶Î§Îª 0~(configMAX_PRIORITIES ¨C 1)¡£ÊıÖµÔ½Ğ¡£¬ÓÅÏÈ¼¶Ô½µÍ¡£Èç¹û´«ÈëµÄÖµ¹ı´ó£¬xTaskCreate »á½«Æäµ÷ÕûÎª (configMAX_PRIORITIES ¨C 1)¡£ |
-| pxCreatedTask | ÓÃÓÚ±£´æ xTaskCreate µÄÊä³ö½á¹û£¬¼´ÈÎÎñµÄ¾ä±ú£¨task handle£©¡£Èç¹ûÒÔºóĞèÒª¶Ô¸ÃÈÎÎñ½øĞĞ²Ù×÷£¬ÈçĞŞ¸ÄÓÅÏÈ¼¶£¬ÔòĞèÒªÊ¹ÓÃ´Ë¾ä±ú¡£Èç¹û²»ĞèÒªÊ¹ÓÃ¸Ã¾ä±ú£¬¿ÉÒÔ´«Èë NULL¡£ |
+|  pvTaskCode   | å‡½æ•°æŒ‡é’ˆï¼Œä»»åŠ¡å¯¹åº”çš„ C å‡½æ•°ã€‚ä»»åŠ¡åº”è¯¥æ°¸è¿œä¸é€€å‡ºï¼Œæˆ–è€…åœ¨é€€å‡ºæ—¶è°ƒç”¨ "vTaskDelete(NULL)"ã€‚ |
+|    pcName     | ä»»åŠ¡çš„åç§°ï¼Œä»…ç”¨äºè°ƒè¯•ç›®çš„ï¼ŒFreeRTOS å†…éƒ¨ä¸ä½¿ç”¨ã€‚pcName çš„é•¿åº¦ä¸º configMAX_TASK_NAME_LEN |
+| usStackDepth  | æ¯ä¸ªä»»åŠ¡éƒ½æœ‰è‡ªå·±çš„æ ˆï¼ŒusStackDepth æŒ‡å®šäº†æ ˆçš„å¤§å°ï¼Œå•ä½ä¸º wordã€‚ä¾‹å¦‚ï¼Œå¦‚æœä¼ å…¥ 100ï¼Œè¡¨ç¤ºæ ˆçš„å¤§å°ä¸º 100 wordï¼Œå³ 400 å­—èŠ‚ã€‚æœ€å¤§å€¼ä¸º uint16_t çš„æœ€å¤§å€¼ã€‚ç¡®å®šæ ˆçš„å¤§å°å¹¶ä¸å®¹æ˜“ï¼Œé€šå¸¸æ˜¯æ ¹æ®ä¼°è®¡æ¥è®¾å®šã€‚ç²¾ç¡®çš„åŠæ³•æ˜¯æŸ¥çœ‹åæ±‡ç¼–ä»£ç ã€‚ |
+| pvParameters  | è°ƒç”¨ pvTaskCode å‡½æ•°æŒ‡é’ˆæ—¶ä½¿ç”¨çš„å‚æ•°ï¼špvTaskCode(pvParameters)ã€‚ |
+|  uxPriority   | ä»»åŠ¡çš„ä¼˜å…ˆçº§èŒƒå›´ä¸º 0~(configMAX_PRIORITIES â€“ 1)ã€‚æ•°å€¼è¶Šå°ï¼Œä¼˜å…ˆçº§è¶Šä½ã€‚å¦‚æœä¼ å…¥çš„å€¼è¿‡å¤§ï¼ŒxTaskCreate ä¼šå°†å…¶è°ƒæ•´ä¸º (configMAX_PRIORITIES â€“ 1)ã€‚ |
+| pxCreatedTask | ç”¨äºä¿å­˜ xTaskCreate çš„è¾“å‡ºç»“æœï¼Œå³ä»»åŠ¡çš„å¥æŸ„ï¼ˆtask handleï¼‰ã€‚å¦‚æœä»¥åéœ€è¦å¯¹è¯¥ä»»åŠ¡è¿›è¡Œæ“ä½œï¼Œå¦‚ä¿®æ”¹ä¼˜å…ˆçº§ï¼Œåˆ™éœ€è¦ä½¿ç”¨æ­¤å¥æŸ„ã€‚å¦‚æœä¸éœ€è¦ä½¿ç”¨è¯¥å¥æŸ„ï¼Œå¯ä»¥ä¼ å…¥ NULLã€‚ |
 
 ```c
-TaskHandle_t xTaskCreateStatic ( TaskFunction_t pxTaskCode,   // º¯ÊıÖ¸Õë, ÈÎÎñº¯Êı
-                                 const char * const pcName,   // ÈÎÎñµÄÃû×Ö
-                                 const uint32_t ulStackDepth, // Õ»´óĞ¡,µ¥Î»Îªword,10±íÊ¾40×Ö½Ú
-                                 void * const pvParameters,   // µ÷ÓÃÈÎÎñº¯ÊıÊ±´«ÈëµÄ²ÎÊı
-                                 UBaseType_t uxPriority,      // ÓÅÏÈ¼¶
-                                 StackType_t * const puxStackBuffer, // ¾²Ì¬·ÖÅäµÄÕ»£¬¾ÍÊÇÒ»¸öbuffer
-                                 StaticTask_t * const pxTaskBuffer );// ¾²Ì¬·ÖÅäµÄÈÎÎñ½á¹¹ÌåµÄÖ¸Õë£¬ÓÃËüÀ´²Ù×÷Õâ¸öÈÎÎñ
+TaskHandle_t xTaskCreateStatic ( TaskFunction_t pxTaskCode,   // å‡½æ•°æŒ‡é’ˆ, ä»»åŠ¡å‡½æ•°
+                                 const char * const pcName,   // ä»»åŠ¡çš„åå­—
+                                 const uint32_t ulStackDepth, // æ ˆå¤§å°,å•ä½ä¸ºword,10è¡¨ç¤º40å­—èŠ‚
+                                 void * const pvParameters,   // è°ƒç”¨ä»»åŠ¡å‡½æ•°æ—¶ä¼ å…¥çš„å‚æ•°
+                                 UBaseType_t uxPriority,      // ä¼˜å…ˆçº§
+                                 StackType_t * const puxStackBuffer, // é™æ€åˆ†é…çš„æ ˆï¼Œå°±æ˜¯ä¸€ä¸ªbuffer
+                                 StaticTask_t * const pxTaskBuffer );// é™æ€åˆ†é…çš„ä»»åŠ¡ç»“æ„ä½“çš„æŒ‡é’ˆï¼Œç”¨å®ƒæ¥æ“ä½œè¿™ä¸ªä»»åŠ¡
 ```
 
 ### 04_freertos_create_multitask_with_para
 
-Ê¹ÓÃ½á¹¹Ìå´«µİ²ÎÊı
+ä½¿ç”¨ç»“æ„ä½“ä¼ é€’å‚æ•°
 
 ### 05_freertos_delete_task
 
-Ê¹ÓÃvTaskDeleteÉ¾³ıÈÎÎñ
+ä½¿ç”¨vTaskDeleteåˆ é™¤ä»»åŠ¡
 
 ```c
 void vTaskDelete ( TaskHandle_t xTaskToDelete );
-NULL£º
+NULLï¼š
 ```
 
 

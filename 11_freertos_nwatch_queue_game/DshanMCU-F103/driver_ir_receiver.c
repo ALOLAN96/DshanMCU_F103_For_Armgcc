@@ -16,15 +16,9 @@
 #include "tim.h"
 
 /* 增加FreeRtos的include文件 */
-#include "FreeRTOS.h"
-#include "queue.h"
+#include "typedefs.h"
 
 extern QueueHandle_t g_xQueuePlatform; /* 挡球板的消息队列 */
-
-typedef struct {
-    uint32_t dev;
-    uint32_t val;
-} IrRecvData; // 红外接收器消息队列item
 
 /* 环形缓冲区: 用来保存解析出来的按键,可以防止丢失 */
 #define BUF_LEN 128
@@ -33,6 +27,8 @@ static int g_KeysBuf_R, g_KeysBuf_W;
 
 static uint64_t g_IRReceiverIRQ_Timers[68];
 static int g_IRReceiverIRQ_Cnt = 0;
+
+static int32_t g_last_val;
 
 #define NEXT_POS(x) ((x + 1) % BUF_LEN)
 
@@ -48,7 +44,8 @@ static int g_IRReceiverIRQ_Cnt = 0;
  * -----------------------------------------------
  * 2023/08/04	     V1.0	  韦东山	      创建
  ***********************************************************************/
-static int isKeysBufEmpty(void)
+static int
+isKeysBufEmpty(void)
 {
     return (g_KeysBuf_R == g_KeysBuf_W);
 }
@@ -172,7 +169,15 @@ static int IRReceiver_IRQTimes_Parse(void)
 
     // 使用FreeRtos消息队列API传递消息
     irRecvData.dev = datas[0];
-    irRecvData.val = datas[2];
+    if (datas[2] == 0xe0) {
+        irRecvData.val = UPT_MOVE_LEFT;
+    } else if (datas[2] == 0x90) {
+        irRecvData.val = UPT_MOVE_RIGHT;
+    } else {
+        irRecvData.val = UPT_MOVE_NONE;
+    }
+
+    g_last_val = irRecvData.val;
     xQueueSendFromISR(g_xQueuePlatform, &irRecvData, NULL);
 
     return 0;
@@ -249,7 +254,7 @@ void IRReceiver_IRQ_Callback(void)
 
             // 使用FreeRtos消息队列API传递消息
             irRecvData.dev = 0;
-            irRecvData.val = 0;
+            irRecvData.val = g_last_val;
             xQueueSendFromISR(g_xQueuePlatform, &irRecvData, NULL);
 
             g_IRReceiverIRQ_Cnt = 0;
