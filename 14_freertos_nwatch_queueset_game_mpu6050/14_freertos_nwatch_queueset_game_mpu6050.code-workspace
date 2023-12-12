@@ -1,0 +1,18 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "files.associations": {
+            "driver_lcd.h": "c",
+            "task.h": "c",
+            "queue.h": "c",
+            "cmath": "c",
+            "driver_timer.h": "c",
+            "driver_ir_receiver.h": "c"
+        }
+    },
+    "extensions": {}
+}
