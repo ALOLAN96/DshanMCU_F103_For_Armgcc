@@ -28,6 +28,10 @@ typedef uint32_t ulong;
 // Quick and easy macro for a for loop
 #define LOOP(count, var) for (byte var = 0; var < count; var++)
 
+#define UPT_MOVE_NONE    0
+#define UPT_MOVE_RIGHT   1
+#define UPT_MOVE_LEFT    2
+
 typedef struct {
     uint32_t dev;
     uint32_t val;

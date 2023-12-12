@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 #include "typedefs.h"
 
 #include "draw.h"
@@ -24,9 +25,6 @@
 
 #define PLATFORM_WIDTH  12
 #define PLATFORM_HEIGHT 4
-#define UPT_MOVE_NONE   0
-#define UPT_MOVE_RIGHT  1
-#define UPT_MOVE_LEFT   2
 #define BLOCK_COLS      32
 #define BLOCK_ROWS      5
 #define BLOCK_COUNT     (BLOCK_COLS * BLOCK_ROWS)
@@ -80,8 +78,6 @@ static const byte clearImg[] = {
 };
 
 static bool btnExit(void);
-static bool btnRight(void);
-static bool btnLeft(void);
 void game1_draw(void);
 
 static byte uptMove;
@@ -97,8 +93,6 @@ static uint8_t *g_framebuffer;
 QueueHandle_t g_xQueuePlatform; /* 挡球板的消息队列 */
 QueueHandle_t g_xQueueRotary;   /* 旋转编码器的消息队列 */
 
-
-
 /* 挡球板任务 */
 static void platform_task(void *params)
 {
@@ -112,51 +106,65 @@ static void platform_task(void *params)
 
     while (1) {
         /* 读取红外遥控器 */
-        // if (0 == IRReceiver_Read(&dev, &data))
-
         // 从消息队列中拿取消息，拿不到就阻塞
         xQueueReceive(g_xQueuePlatform, &irRecvData, portMAX_DELAY);
-        data = irRecvData.val;
 
-        {
-            if (data == 0x00) /* Repeat */
-            {
-                data = last_data;
-            }
+        uptMove = irRecvData.val;
 
-            if (data == 0xe0) /* Left */
-            {
-                btnLeft();
-            }
+        // Hide platform
+        draw_bitmap(platformXtmp, g_yres - 8, clearImg, 12, 8, NOINVERT, 0);
+        draw_flushArea(platformXtmp, g_yres - 8, 12, 8);
 
-            if (data == 0x90) /* Right */
-            {
-                btnRight();
-            }
-            last_data = data;
+        // Move platform
+        if (uptMove == UPT_MOVE_RIGHT)
+            platformXtmp += 3;
+        else if (uptMove == UPT_MOVE_LEFT)
+            platformXtmp -= 3;
+        uptMove = UPT_MOVE_NONE;
 
-            // Hide platform
-            draw_bitmap(platformXtmp, g_yres - 8, clearImg, 12, 8, NOINVERT, 0);
-            draw_flushArea(platformXtmp, g_yres - 8, 12, 8);
+        // Make sure platform stays on screen
+        if (platformXtmp > 250)
+            platformXtmp = 0;
+        else if (platformXtmp > g_xres - PLATFORM_WIDTH)
+            platformXtmp = g_xres - PLATFORM_WIDTH;
 
-            // Move platform
-            if (uptMove == UPT_MOVE_RIGHT)
-                platformXtmp += 3;
-            else if (uptMove == UPT_MOVE_LEFT)
-                platformXtmp -= 3;
-            uptMove = UPT_MOVE_NONE;
+        // Draw platform
+        draw_bitmap(platformXtmp, g_yres - 8, platform, 12, 8, NOINVERT, 0);
+        draw_flushArea(platformXtmp, g_yres - 8, 12, 8);
 
-            // Make sure platform stays on screen
-            if (platformXtmp > 250)
-                platformXtmp = 0;
-            else if (platformXtmp > g_xres - PLATFORM_WIDTH)
-                platformXtmp = g_xres - PLATFORM_WIDTH;
+        platformX = platformXtmp;
+    }
+}
 
-            // Draw platform
-            draw_bitmap(platformXtmp, g_yres - 8, platform, 12, 8, NOINVERT, 0);
-            draw_flushArea(platformXtmp, g_yres - 8, 12, 8);
+static void RotaryEncoderTask(void *params)
+{
+    RotaryRecvData rotaryRecvData;
+    IrRecvData irRecvData;
+    irRecvData.dev = 1; // 随便设置的，对于platform_task无用
 
-            platformX = platformXtmp;
+    int cnt;
+
+    for (;;) {
+        // 读旋转编码器队列
+        xQueueReceive(g_xQueueRotary, &rotaryRecvData, portMAX_DELAY);
+        // 处理数据
+        /* 判断速度:负数表示向左转动，正数表示向右转动 */
+        if (rotaryRecvData.speed < 0) {     // 负数bug，此处教程是在这面做了处理
+            irRecvData.val = UPT_MOVE_LEFT; /* left的红外键值 */
+        } else {
+            irRecvData.val = UPT_MOVE_RIGHT; /* right的红外键值 */
+        }
+
+        if (abs(rotaryRecvData.speed) > 100)
+            cnt = 4;
+        else if (abs(rotaryRecvData.speed) > 50) // 负数bug，此处教程是在上面做了处理
+            cnt = 2;
+        else
+            cnt = 1;
+
+        // 写挡球板队列
+        for (size_t i = 0; i < cnt; i++) {
+            xQueueSendToBack(g_xQueuePlatform, &irRecvData, 0);
         }
     }
 }
@@ -167,9 +175,11 @@ void game1_task(void *params)
     draw_init();
     draw_end();
 
-    // 创建2个消息队列，用于任务间通信 创建一个
-    g_xQueuePlatform = xQueueCreate(10u, sizeof(IrRecvData)); // 创建挡球板消息队列
-    g_xQueueRotary   = xQueueCreate(10u, sizeof(RotaryRecvData));
+    // 创建2个消息队列和一个编码器任务，用于任务间通信
+    g_xQueuePlatform = xQueueCreate(10u, sizeof(IrRecvData));     // 创建挡球板消息队列
+    g_xQueueRotary   = xQueueCreate(10u, sizeof(RotaryRecvData)); // 创建旋转编码器消息队列
+
+    xTaskCreate(RotaryEncoderTask, "RotaryEncoder_task", 128, NULL, osPriorityNormal, NULL);
 
     uptMove = UPT_MOVE_NONE;
 
@@ -187,7 +197,7 @@ void game1_task(void *params)
     lives = lives_origin = 3;
     score                = 0;
     platformX            = (g_xres / 2) - (PLATFORM_WIDTH / 2);
-
+    
     xTaskCreate(platform_task, "platform_task", 128, NULL, osPriorityNormal, NULL);
 
     while (1) {
@@ -209,18 +219,6 @@ static bool btnExit()
         vTaskDelete(NULL);
     }
     return true;
-}
-
-static bool btnRight()
-{
-    uptMove = UPT_MOVE_RIGHT;
-    return false;
-}
-
-static bool btnLeft()
-{
-    uptMove = UPT_MOVE_LEFT;
-    return false;
 }
 
 void game1_draw()

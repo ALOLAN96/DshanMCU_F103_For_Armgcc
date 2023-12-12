@@ -1,30 +1,38 @@
-/*  Copyright (s) 2019 深圳百问网科技有限公司
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ * Copyright (c) 2008-2023 100askTeam : Dongshan WEI <weidongshan@qq.com>
+ * Discourse:  https://forums.100ask.net
+ */
+
+/*  Copyright (C) 2008-2023 深圳百问网科技有限公司
  *  All rights reserved
  *
- * 文件名称：driver_ir_receiver.c
- * 摘要：
+ * 免责声明: 百问网编写的文档, 仅供学员学习使用, 可以转发或引用(请保留作者信息),禁止用于商业用途！
+ * 免责声明: 百问网编写的程序, 可以用于商业用途, 但百问网不承担任何后果！
  *
- * 修改历史     版本号        Author       修改内容
- *--------------------------------------------------
+ * 本程序遵循GPL V3协议, 请遵循协议
+ * 百问网学习平台   : https://www.100ask.net
+ * 百问网交流社区   : https://forums.100ask.net
+ * 百问网官方B站    : https://space.bilibili.com/275908810
+ * 本程序所用开发板 : DShanMCU-F103
+ * 百问网官方淘宝   : https://100ask.taobao.com
+ * 联系我们(E-mail): weidongshan@qq.com
+ *
+ *          版权所有，盗版必究。
+ *
+ * 修改历史     版本号           作者        修改内容
+ *-----------------------------------------------------
  * 2023.08.04      v01         百问科技      创建文件
- *--------------------------------------------------
+ *-----------------------------------------------------
  */
+
 #include "driver_ir_receiver.h"
 #include "driver_lcd.h"
 #include "driver_timer.h"
 #include "stm32f1xx_hal.h"
 #include "tim.h"
 
-/* 增加FreeRtos的include文件 */
-#include "FreeRTOS.h"
-#include "queue.h"
-
-extern QueueHandle_t g_xQueuePlatform; /* 挡球板的消息队列 */
-
-typedef struct {
-    uint32_t dev;
-    uint32_t val;
-} IrRecvData; // 红外接收器消息队列item
+#include "typedefs.h"
 
 /* 环形缓冲区: 用来保存解析出来的按键,可以防止丢失 */
 #define BUF_LEN 128
@@ -33,6 +41,9 @@ static int g_KeysBuf_R, g_KeysBuf_W;
 
 static uint64_t g_IRReceiverIRQ_Timers[68];
 static int g_IRReceiverIRQ_Cnt = 0;
+static uint32_t g_last_val;
+
+extern QueueHandle_t g_xQueuePlatform; /* 挡球板队列 */
 
 #define NEXT_POS(x) ((x + 1) % BUF_LEN)
 
@@ -167,13 +178,18 @@ static int IRReceiver_IRQTimes_Parse(void)
         return -1;
     }
 
-    // PutKeyToBuf(datas[0]);
-    // PutKeyToBuf(datas[2]);
-
-    // 使用FreeRtos消息队列API传递消息
+    // 使用FreeRTOS队列的API完成消息的传输写队列
     irRecvData.dev = datas[0];
-    irRecvData.val = datas[2];
-    xQueueSendFromISR(g_xQueuePlatform, &irRecvData, NULL);
+
+    if (datas[2] == 0xe0) {
+        irRecvData.val = UPT_MOVE_LEFT;
+    } else if (datas[2] == 0x90) {
+        irRecvData.val = UPT_MOVE_RIGHT;
+    } else {
+        irRecvData.val = UPT_MOVE_NONE;
+    }
+    g_last_val = irRecvData.val;
+    xQueueSendToBackFromISR(g_xQueuePlatform, &irRecvData, NULL);
 
     return 0;
 }
@@ -244,14 +260,10 @@ void IRReceiver_IRQ_Callback(void)
         /* 是否重复码 */
         if (isRepeatedKey()) {
             /* device: 0, val: 0, 表示重复码 */
-            // PutKeyToBuf(0);
-            // PutKeyToBuf(0);
-
-            // 使用FreeRtos消息队列API传递消息
+            /* 使用FreeRTOS队列的API完成消息的传输写队列 */
             irRecvData.dev = 0;
-            irRecvData.val = 0;
-            xQueueSendFromISR(g_xQueuePlatform, &irRecvData, NULL);
-
+            irRecvData.val = g_last_val;
+            xQueueSendToBackFromISR(g_xQueuePlatform, &irRecvData, NULL);
             g_IRReceiverIRQ_Cnt = 0;
         }
     }

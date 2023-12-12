@@ -103,7 +103,7 @@ void MX_FREERTOS_Init(void)
 
     /* Create the thread(s) */
     /* creation of startTask */
-    startTaskHandle = osThreadNew(AppStartTask, NULL, &startTask_attributes);
+    //startTaskHandle = osThreadNew(AppStartTask, NULL, &startTask_attributes);
 
     /* USER CODE BEGIN RTOS_THREADS */
     xTaskCreate(game1_task, "Game Task", 128, NULL, osPriorityNormal, &Game1TaskHandle);
