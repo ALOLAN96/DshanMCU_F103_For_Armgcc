@@ -14,7 +14,9 @@
             "driver_ir_receiver.h": "c",
             "draw.h": "c",
             "typedefs.h": "c",
-            "cmsis_os.h": "c"
+            "cmsis_os.h": "c",
+            "math.h": "c",
+            "stdbool.h": "c"
         }
     },
     "extensions": {}

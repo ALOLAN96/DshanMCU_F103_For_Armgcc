@@ -6,10 +6,7 @@
     ],
     "settings": {
         "files.associations": {
-            "stm32f1xx_hal.h": "c",
-            "typedefs.h": "c",
-            "driver_rotary_encoder.h": "c",
-            "freertos.h": "c"
+            "typedefs.h": "c"
         }
     },
     "extensions": {}
