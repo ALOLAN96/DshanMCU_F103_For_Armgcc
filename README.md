@@ -1,20 +1,24 @@
 ## STM32开发环境说明：
 
+前提：使用开源或免费开发工具开发STM32（嫌繁琐的话可以使用CubeIDE），两者相差不大均属于基于gcc开发
+
 ### 使用工具：
 
 #### MCU：STM32F103C8T6
 
-​          Arm Cortex-M3 MCU with 64 Kbytes of  Flash memory, 72 MHz CPU
+​	Arm Cortex-M3 MCU with 64 Kbytes of  Flash memory,20 Kbytes of RAM, 72 MHz CPU
 
 #### CubeMX：V6.9.2
 
-#### VSCode：安装EIDE插件 其中集成了编译、下载、调试等额外开发插件
+​	完成外设初始化，开启FREEROS的中间件，接口：CMSIS_V2，生成Makefile工程文件
 
-#### 交叉编译工具链：(GNU Arm Embedded Toolchain 10-2020-q4-major) 10.2.1 20201103 (release)
+#### VSCode：安装EIDE插件 其中集成了编译、下载、调试等额外辅助开发插件
 
-#### 下载：STM32CubeProgrammer v2.8.0 
+##### 交叉编译工具链：(GNU Arm Embedded Toolchain 10-2020-q4-major) 10.2.1 20201103 (release)
 
-#### 调试：openocd
+##### 下载：STM32CubeProgrammer v2.8.0 
+
+##### 调试：openocd
 
 ### 具体使用步骤说明：
 
@@ -22,13 +26,11 @@
 
 #### EIDE使用论坛：[Embedded IDE Forum (em-ide.com)](https://discuss.em-ide.com/)
 
-
-
 ## 项目工程文件夹说明
 
 ### 01_freertos_template
 
-一个使用CubeMX初始化STM32F103C8T6相关外设的模板工程，里面包含了相关外设驱动的代码
+一个使用CubeMX初始化STM32F103C8T6相关外设的模板工程，里面添加包含了相关外设驱动的代码
 
 ### 02_freertos_create_the_first_multitask
 
@@ -83,10 +85,12 @@ NULL：
 
 ### 06_freertos_task_priority
 
-
+任务优先级对于任务的影响
 
 ### 07_freertos_task_suspend
 
-
+任务挂起与恢复
 
 ### 08_freertos_idle_task
+
+空闲任务
