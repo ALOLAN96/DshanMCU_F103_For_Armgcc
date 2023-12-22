@@ -235,10 +235,10 @@ void MPU6050Task(void *params) // 因为此任务中数据不是由中断发送�
 {
     int16_t AccX;
     MPU6050RecvData mpu6050RecvData;
+    g_xMPU6050EventGroupHandle = GetMPU6050EventGroupHandle();
     int res;
     for (;;) {
-        // 等待事件bit0
-        g_xMPU6050EventGroupHandle = GetMPU6050EventGroupHandle();
+        // 等待事件bit0 
         xEventGroupWaitBits(g_xMPU6050EventGroupHandle, (1 << 0), pdTRUE, pdFALSE, portMAX_DELAY);
 
         GetI2C();

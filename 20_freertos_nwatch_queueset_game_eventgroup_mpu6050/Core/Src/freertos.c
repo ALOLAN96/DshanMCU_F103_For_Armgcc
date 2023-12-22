@@ -55,9 +55,9 @@ SemaphoreHandle_t g_xSemOfI2CMutex;
 /* Definitions for startTask */
 osThreadId_t startTaskHandle;
 const osThreadAttr_t startTask_attributes = {
-  .name = "startTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+    .name       = "startTask",
+    .stack_size = 128 * 4,
+    .priority   = (osPriority_t)osPriorityNormal,
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -65,13 +65,13 @@ const osThreadAttr_t startTask_attributes = {
 void game1_task(void *argument);
 void GetI2C(void)
 {
-    // 等待�?个互斥量
+    // 等待一个互斥量
     xSemaphoreTake(g_xSemOfI2CMutex, portMAX_DELAY);
 }
 
 void PutI2C(void)
 {
-    // 释放�?个互斥量
+    // 释放一个互斥量
     xSemaphoreGive(g_xSemOfI2CMutex);
 }
 /* USER CODE END FunctionPrototypes */
@@ -81,52 +81,52 @@ void AppStartTask(void *argument);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /**
-  * @brief  FreeRTOS initialization
-  * @param  None
-  * @retval None
-  */
-void MX_FREERTOS_Init(void) {
-  /* USER CODE BEGIN Init */
+ * @brief  FreeRTOS initialization
+ * @param  None
+ * @retval None
+ */
+void MX_FREERTOS_Init(void)
+{
+    /* USER CODE BEGIN Init */
     LCD_Init();
     LCD_Clear();
 
-    IRReceiver_Init(); // 此处初始化是初始化队�?
+    IRReceiver_Init(); // 此处初始化是初始化队列
     RotaryEncoder_Init();
     MPU6050_Init();
 
     TaskHandle_t Game1TaskHandle;
-  /* USER CODE END Init */
+    /* USER CODE END Init */
 
-  /* USER CODE BEGIN RTOS_MUTEX */
+    /* USER CODE BEGIN RTOS_MUTEX */
     g_xSemOfI2CMutex = xSemaphoreCreateMutex();
     /* add mutexes, ... */
-  /* USER CODE END RTOS_MUTEX */
+    /* USER CODE END RTOS_MUTEX */
 
-  /* USER CODE BEGIN RTOS_SEMAPHORES */
+    /* USER CODE BEGIN RTOS_SEMAPHORES */
     /* add semaphores, ... */
-  /* USER CODE END RTOS_SEMAPHORES */
+    /* USER CODE END RTOS_SEMAPHORES */
 
-  /* USER CODE BEGIN RTOS_TIMERS */
+    /* USER CODE BEGIN RTOS_TIMERS */
     /* start timers, add new ones, ... */
-  /* USER CODE END RTOS_TIMERS */
+    /* USER CODE END RTOS_TIMERS */
 
-  /* USER CODE BEGIN RTOS_QUEUES */
+    /* USER CODE BEGIN RTOS_QUEUES */
     /* add queues, ... */
-  /* USER CODE END RTOS_QUEUES */
+    /* USER CODE END RTOS_QUEUES */
 
-  /* Create the thread(s) */
-  /* creation of startTask */
-  startTaskHandle = osThreadNew(AppStartTask, NULL, &startTask_attributes);
+    /* Create the thread(s) */
+    /* creation of startTask */
+    //startTaskHandle = osThreadNew(AppStartTask, NULL, &startTask_attributes);
 
-  /* USER CODE BEGIN RTOS_THREADS */
+    /* USER CODE BEGIN RTOS_THREADS */
     xTaskCreate(game1_task, "Game Task", 128, NULL, osPriorityNormal, &Game1TaskHandle);
     /* add threads, ... */
-  /* USER CODE END RTOS_THREADS */
+    /* USER CODE END RTOS_THREADS */
 
-  /* USER CODE BEGIN RTOS_EVENTS */
+    /* USER CODE BEGIN RTOS_EVENTS */
     /* add events, ... */
-  /* USER CODE END RTOS_EVENTS */
-
+    /* USER CODE END RTOS_EVENTS */
 }
 
 /* USER CODE BEGIN Header_AppStartTask */
@@ -138,16 +138,15 @@ void MX_FREERTOS_Init(void) {
 /* USER CODE END Header_AppStartTask */
 void AppStartTask(void *argument)
 {
-  /* USER CODE BEGIN AppStartTask */
+    /* USER CODE BEGIN AppStartTask */
     /* Infinite loop */
     for (;;) {
-        //MUSIC_Analysis();
+        MPU6050_Test();
     }
-  /* USER CODE END AppStartTask */
+    /* USER CODE END AppStartTask */
 }
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
 
 /* USER CODE END Application */
-

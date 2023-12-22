@@ -16,8 +16,8 @@
 #include "driver_timer.h"
 #include <math.h>
 
-static QueueHandle_t g_xQueueMPU6050Handle; /* MPU6050队列 */
-static EventGroupHandle_t g_xEventGroupMPU6050Handle;
+static QueueHandle_t g_xQueueMPU6050Handle;           /* MPU6050队列 */
+static EventGroupHandle_t g_xEventGroupMPU6050Handle; /* MPU6050事件组 */
 
 //****************************************
 // 定义MPU6050内部地址
@@ -27,20 +27,23 @@ static EventGroupHandle_t g_xEventGroupMPU6050Handle;
 #define MPU6050_GYRO_CONFIG  0x1B // 陀螺仪自检及测量范围，典型值：0x18(不自检，2000deg/s)
 #define MPU6050_ACCEL_CONFIG 0x1C // 加速计自检、测量范围及高通滤波频率，典型值：0x01(不自检，2G，5Hz)
 
-#define MPU6050_ACCEL_XOUT_H 0x3B
-#define MPU6050_ACCEL_XOUT_L 0x3C
-#define MPU6050_ACCEL_YOUT_H 0x3D
+#define MPU6050_ACCEL_XOUT_H 0x3B // 加速度计X轴数据高位
+#define MPU6050_ACCEL_XOUT_L 0x3C // 加速度计X轴数据低位
+#define MPU6050_ACCEL_YOUT_H 0x3D // 以此类推
 #define MPU6050_ACCEL_YOUT_L 0x3E
 #define MPU6050_ACCEL_ZOUT_H 0x3F
 #define MPU6050_ACCEL_ZOUT_L 0x40
-#define MPU6050_TEMP_OUT_H   0x41
+#define MPU6050_TEMP_OUT_H   0x41 // 温度传感器数据
 #define MPU6050_TEMP_OUT_L   0x42
-#define MPU6050_GYRO_XOUT_H  0x43
+#define MPU6050_GYRO_XOUT_H  0x43 // 陀螺仪X轴数据高位
 #define MPU6050_GYRO_XOUT_L  0x44
 #define MPU6050_GYRO_YOUT_H  0x45
 #define MPU6050_GYRO_YOUT_L  0x46
 #define MPU6050_GYRO_ZOUT_H  0x47
 #define MPU6050_GYRO_ZOUT_L  0x48
+
+#define MPU6050_INT_PIN_CFG  0x37 // 中断引脚控制
+#define MPU6050_INT_ENABLE   0x38 // 中断使能
 
 #define MPU6050_PWR_MGMT_1   0x6B // 电源管理，典型值：0x00(正常启用)
 #define MPU6050_PWR_MGMT_2   0x6C
@@ -123,6 +126,12 @@ int MPU6050_Init(void)
     MPU6050_WriteRegister(MPU6050_CONFIG, 0x06);
     MPU6050_WriteRegister(MPU6050_GYRO_CONFIG, 0x18);
     MPU6050_WriteRegister(MPU6050_ACCEL_CONFIG, 0x18);
+
+    /* 配置MPU6050中断相关设置 */
+    /* 配置中断引脚 */
+    MPU6050_WriteRegister(MPU6050_INT_PIN_CFG, 0);
+    /* 开中断 */
+    MPU6050_WriteRegister(MPU6050_INT_ENABLE, 0xff);
 
     g_xQueueMPU6050Handle      = xQueueCreate(MPU6050_QUEUE_LEN, sizeof(MPU6050RecvData));
     g_xEventGroupMPU6050Handle = xEventGroupCreate();
@@ -212,7 +221,7 @@ int MPU6050_ReadData(int16_t *pAccX, int16_t *pAccY, int16_t *pAccZ, int16_t *pG
 void MPU6050_ParseData(int16_t AccX, int16_t AccY, int16_t AccZ, int16_t GyroX, int16_t GyroY, int16_t GyroZ, MPU6050RecvData *result)
 {
     if (result) {
-        result->angle_x = (int32_t)(acos((double)((double)(AccX + MPU6050_X_ACCEL_OFFSET) / 16384.0)) * 57.29577);
+        result->angle_x = (int32_t)(acos((double)((double)(AccX + MPU6050_X_ACCEL_OFFSET) / 16384.0)) * 57.79577);
     }
 }
 
@@ -232,7 +241,7 @@ void MPU6050_Test(void)
     int id;
     int16_t AccX, AccY, AccZ, GyroX, GyroY, GyroZ;
 
-    MPU6050_Init();
+    // MPU6050_Init();
 
     id = MPU6050_GetID();
     LCD_PrintString(0, 0, "MPU6050 ID:");
@@ -255,5 +264,13 @@ void MPU6050_Test(void)
         LCD_PrintString(0, 4, "Z: ");
         LCD_PrintSignedVal(3, 4, AccZ);
         LCD_PrintSignedVal(12, 4, GyroZ);
+    }
+}
+
+void MPU6050_IRQ_Callback(void)
+{
+    if (g_xEventGroupMPU6050Handle != NULL) {
+        // 设置事件组
+        xEventGroupSetBitsFromISR(g_xEventGroupMPU6050Handle, (1 << 0), NULL);
     }
 }

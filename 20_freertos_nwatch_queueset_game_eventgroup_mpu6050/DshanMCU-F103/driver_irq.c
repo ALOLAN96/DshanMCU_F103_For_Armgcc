@@ -1,14 +1,14 @@
 /*  Copyright (s) 2019 深圳百问网科技有限公司
  *  All rights reserved
- * 
+ *
  * 文件名称：driver_irq.c
  * 摘要：
- *  
+ *
  * 修改历史     版本号        Author       修改内容
  *--------------------------------------------------
  * 2023.08.05      v01         百问科技      创建文件
  *--------------------------------------------------
-*/
+ */
 
 #include "driver_timer.h"
 #include "stm32f1xx_hal.h"
@@ -16,6 +16,7 @@
 
 extern void IRReceiver_IRQ_Callback(void);
 extern void RotaryEncoder_IRQ_Callback(void);
+extern void MPU6050_IRQ_Callback(void);
 
 /**********************************************************************
  * 函数名称： HAL_GPIO_EXTI_Callback
@@ -29,24 +30,24 @@ extern void RotaryEncoder_IRQ_Callback(void);
  ***********************************************************************/
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-    switch (GPIO_Pin)
-    {
-        case GPIO_PIN_10:
-        {
+    switch (GPIO_Pin) {
+        case GPIO_PIN_10: {
             IRReceiver_IRQ_Callback();
             break;
         }
 
-        case GPIO_PIN_12:
-        {
+        case GPIO_PIN_12: {
             RotaryEncoder_IRQ_Callback();
             break;
         }
 
-        default:
-        {
+        case GPIO_PIN_5: {
+            MPU6050_IRQ_Callback();
+            break;
+        }
+
+        default: {
             break;
         }
     }
 }
-

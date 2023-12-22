@@ -81,4 +81,6 @@ int MPU6050_ReadData(int16_t *pAccX, int16_t *pAccY, int16_t *pAccZ, int16_t *pG
  ***********************************************************************/
 void MPU6050_Test(void);
 
+void MPU6050_IRQ_Callback(void);
+
 #endif /* __DRIVER_OLED_H */

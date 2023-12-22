@@ -6,7 +6,10 @@
     ],
     "settings": {
         "files.associations": {
-            "typedefs.h": "c"
+            "typedefs.h": "c",
+            "math.h": "c",
+            "queue.h": "c",
+            "driver_mpu6050.h": "c"
         }
     },
     "extensions": {}
