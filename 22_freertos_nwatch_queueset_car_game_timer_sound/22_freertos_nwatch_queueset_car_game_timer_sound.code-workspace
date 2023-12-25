@@ -1,0 +1,14 @@
+{
+    "folders": [
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "files.associations": {
+            "driver_passive_buzzer.h": "c",
+            "beep.h": "c"
+        }
+    },
+    "extensions": {}
+}
