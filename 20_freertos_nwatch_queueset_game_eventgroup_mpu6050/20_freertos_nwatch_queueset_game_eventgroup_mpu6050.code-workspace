@@ -10,7 +10,8 @@
             "math.h": "c",
             "queue.h": "c",
             "driver_mpu6050.h": "c"
-        }
+        },
+        "cortex-debug.variableUseNaturalFormat": true
     },
     "extensions": {}
 }
