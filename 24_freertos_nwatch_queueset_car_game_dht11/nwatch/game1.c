@@ -93,16 +93,17 @@ static byte platformX;
 static uint32_t g_xres, g_yres, g_bpp;
 static uint8_t *g_framebuffer;
 
-static QueueSetHandle_t g_xQueueSetInput; /* 输入设备队列集，处理红外队列和旋转编码器队列 */
+static QueueSetHandle_t g_xQueueSetInput; /* 输入设备队列集，处理红外队列、旋转编码器队列、MPU6050队列信息，处理后传递给挡球板队列 */
 
-static QueueHandle_t g_xQueuePlatform;      // 挡球板队列
+static QueueHandle_t g_xQueuePlatform;      // 控制挡球板移动队列
 static QueueHandle_t g_xQueueIrHandle;      // 红外队列
 static QueueHandle_t g_xQueueRotaryHandle;  // 旋转编码器队列
 static QueueHandle_t g_xQueueMPU6050Handle; // MPU6050队列
 
 static TimerHandle_t g_TimeDHT11; // DHT11软件定时器
 
-/* 挡球板任务 */
+/// @brief 挡球板控制任务
+/// @param params Not used
 static void platform_task(void *params)
 {
     byte platformXtmp = platformX;
@@ -113,8 +114,7 @@ static void platform_task(void *params)
     draw_flushArea(platformXtmp, g_yres - 8, 12, 8);
 
     while (1) {
-        /* 读取红外遥控器 */
-        // 从消息队列中拿取消息，拿不到就阻塞
+        // 从消息队列中获得控制消息，拿不到就阻塞
         xQueueReceive(g_xQueuePlatform, &irRecvData, portMAX_DELAY);
         uptMove = irRecvData.val;
 
@@ -143,6 +143,8 @@ static void platform_task(void *params)
     }
 }
 
+/// @brief 解析红外数据，得到挡球板移动数据并发送
+/// @param None
 static void ProcessIrData(void)
 {
     IrRecvData irRecvData;
@@ -166,6 +168,8 @@ static void ProcessIrData(void)
     xQueueSendToBack(g_xQueuePlatform, &platformRecvData, 0);
 }
 
+/// @brief 解析旋转编码器数据，得到挡球板移动数据并发送
+/// @param None
 static void ProcessRotaryData(void)
 {
     RotaryRecvData rotaryRecvData;
@@ -193,6 +197,8 @@ static void ProcessRotaryData(void)
     }
 }
 
+/// @brief 解析MPU6050的数据，得到挡球板移动数据并发送
+/// @param None
 static void ProcessMPU6050Data(void)
 {
     PlatformRecvData platformRecvData;
@@ -212,6 +218,8 @@ static void ProcessMPU6050Data(void)
     xQueueSendToBack(g_xQueuePlatform, &platformRecvData, 0);
 }
 
+/// @brief 输入设置处理任务
+/// @param params Not used
 static void InputTask(void *params)
 {
     QueueSetMemberHandle_t xRcvQueueHandle;
@@ -230,31 +238,8 @@ static void InputTask(void *params)
     }
 }
 
-extern void PutI2C(void);
-extern void GetI2C(void);
-
-void MPU6050Task(void *params) // 因为此任务中数据不是由中断发送过来，而是自行创建个任务进行读取
-{
-    int16_t AccX;
-    MPU6050RecvData mpu6050RecvData;
-    int res;
-    for (;;) {
-
-        GetI2C();
-        res = MPU6050_ReadData(&AccX, NULL, NULL, NULL, NULL, NULL);
-        PutI2C();
-
-        if (0 == res) { // 读到数据
-            // 解析数据
-            MPU6050_ParseData(AccX, 0, 0, 0, 0, 0, &mpu6050RecvData);
-
-            // 写入队列中
-            xQueueSendToBack(g_xQueueMPU6050Handle, &mpu6050RecvData, 0);
-        }
-        vTaskDelay(50);
-    }
-}
-
+/// @brief 软件定时器触发任务
+/// @param xTimer
 void DHT11Timer(TimerHandle_t xTimer)
 {
     int hum, temp, res;
@@ -276,6 +261,8 @@ void DHT11Timer(TimerHandle_t xTimer)
     }
 }
 
+/// @brief game1task，
+/// @param params Not used
 void game1_task(void *params)
 {
     g_framebuffer = LCD_GetFrameBuffer(&g_xres, &g_yres, &g_bpp);
@@ -283,7 +270,7 @@ void game1_task(void *params)
     draw_end();
 
     // 创建消息队列集、消息队列、输入解码任务、MPU6050任务
-    g_xQueueSetInput = xQueueCreateSet(IR_QUEUE_LEN + ROTARY_QUEUE_LEN); // 队列集长度应设置为添加到集合中的队列长度的总和
+    g_xQueueSetInput = xQueueCreateSet(IR_QUEUE_LEN + ROTARY_QUEUE_LEN + MPU6050_QUEUE_LEN); // 队列集长度应设置为添加到集合中的队列长度的总和
     g_xQueuePlatform = xQueueCreate(IR_QUEUE_LEN + ROTARY_QUEUE_LEN + MPU6050_QUEUE_LEN, sizeof(PlatformRecvData));
     xTaskCreate(InputTask, "InputTask", 128, NULL, osPriorityNormal, NULL);
 
@@ -295,6 +282,7 @@ void game1_task(void *params)
     xQueueAddToSet(g_xQueueRotaryHandle, g_xQueueSetInput);
     xQueueAddToSet(g_xQueueMPU6050Handle, g_xQueueSetInput);
 
+    extern void MPU6050Task(void *params);
     xTaskCreate(MPU6050Task, "MPU6050Task", 128, NULL, osPriorityNormal, NULL); // 此处创建任务的原因是：先放入队列集，任务创建后就有数据，若未放入，队列满了，队列集不会出数据
 
     uptMove = UPT_MOVE_NONE;
@@ -304,8 +292,6 @@ void game1_task(void *params)
 
     ball.velX = -0.5;
     ball.velY = -0.6;
-    //	ball.velX = -1;
-    //	ball.velY = -1.1;
 
     blocks = pvPortMalloc(BLOCK_COUNT);
     memset(blocks, 0, BLOCK_COUNT);
@@ -315,7 +301,7 @@ void game1_task(void *params)
     platformX            = (g_xres / 2) - (PLATFORM_WIDTH / 2);
 
     xTaskCreate(platform_task, "platform_task", 128, NULL, osPriorityNormal, NULL);
-    g_TimeDHT11 = xTimerCreate("DHT11", 2000, pdTRUE, NULL, DHT11Timer);
+    g_TimeDHT11 = xTimerCreate("DHT11", 2000, pdTRUE, NULL, DHT11Timer); // 创建软件定时器
     xTimerStart(g_TimeDHT11, portMAX_DELAY);
     BuzzerInit();
     DHT11_Init();

@@ -31,6 +31,7 @@
 #include "driver_lcd.h"
 #include "game1.h"
 #include "typedefs.h"
+#include "driver_led.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,22 +57,22 @@ SemaphoreHandle_t g_xSemOfI2CMutex;
 /* Definitions for startTask */
 osThreadId_t startTaskHandle;
 const osThreadAttr_t startTask_attributes = {
-  .name = "startTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+    .name       = "startTask",
+    .stack_size = 128 * 4,
+    .priority   = (osPriority_t)osPriorityNormal,
 };
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 void GetI2C(void)
 {
-    // 等待�?个互斥量
+    // 等待�??个互斥量
     xSemaphoreTake(g_xSemOfI2CMutex, portMAX_DELAY);
 }
 
 void PutI2C(void)
 {
-    // 释放�?个互斥量
+    // 释放�??个互斥量
     xSemaphoreGive(g_xSemOfI2CMutex);
 }
 /* USER CODE END FunctionPrototypes */
@@ -88,64 +89,61 @@ unsigned long getRunTimeCounterValue(void);
 /* Functions needed when configGENERATE_RUN_TIME_STATS is on */
 __weak void configureTimerForRunTimeStats(void)
 {
-
 }
 
 __weak unsigned long getRunTimeCounterValue(void)
 {
-return 0;
+    return 0;
 }
 /* USER CODE END 1 */
 
 /**
-  * @brief  FreeRTOS initialization
-  * @param  None
-  * @retval None
-  */
-void MX_FREERTOS_Init(void) {
-  /* USER CODE BEGIN Init */
+ * @brief  FreeRTOS initialization
+ * @param  None
+ * @retval None
+ */
+void MX_FREERTOS_Init(void)
+{
+    /* USER CODE BEGIN Init */
     LCD_Init();
     LCD_Clear();
 
-    IRReceiver_Init(); // 此处初始化是初始化队�?
+    IRReceiver_Init(); // 此处初始化是初始化队�??
     RotaryEncoder_Init();
     MPU6050_Init();
 
-    extern void car_game(void *argument);
-
     TaskHandle_t Game1TaskHandle;
-  /* USER CODE END Init */
+    /* USER CODE END Init */
 
-  /* USER CODE BEGIN RTOS_MUTEX */
+    /* USER CODE BEGIN RTOS_MUTEX */
     g_xSemOfI2CMutex = xSemaphoreCreateMutex();
     /* add mutexes, ... */
-  /* USER CODE END RTOS_MUTEX */
+    /* USER CODE END RTOS_MUTEX */
 
-  /* USER CODE BEGIN RTOS_SEMAPHORES */
+    /* USER CODE BEGIN RTOS_SEMAPHORES */
     /* add semaphores, ... */
-  /* USER CODE END RTOS_SEMAPHORES */
+    /* USER CODE END RTOS_SEMAPHORES */
 
-  /* USER CODE BEGIN RTOS_TIMERS */
+    /* USER CODE BEGIN RTOS_TIMERS */
     /* start timers, add new ones, ... */
-  /* USER CODE END RTOS_TIMERS */
+    /* USER CODE END RTOS_TIMERS */
 
-  /* USER CODE BEGIN RTOS_QUEUES */
+    /* USER CODE BEGIN RTOS_QUEUES */
     /* add queues, ... */
-  /* USER CODE END RTOS_QUEUES */
+    /* USER CODE END RTOS_QUEUES */
 
-  /* Create the thread(s) */
-  /* creation of startTask */
-  startTaskHandle = osThreadNew(AppStartTask, NULL, &startTask_attributes);
+    /* Create the thread(s) */
+    /* creation of startTask */
+    startTaskHandle = osThreadNew(AppStartTask, NULL, &startTask_attributes);
 
-  /* USER CODE BEGIN RTOS_THREADS */
+    /* USER CODE BEGIN RTOS_THREADS */
     xTaskCreate(game1_task, "Game Task", 128 * 2, NULL, osPriorityNormal, &Game1TaskHandle);
     /* add threads, ... */
-  /* USER CODE END RTOS_THREADS */
+    /* USER CODE END RTOS_THREADS */
 
-  /* USER CODE BEGIN RTOS_EVENTS */
+    /* USER CODE BEGIN RTOS_EVENTS */
     /* add events, ... */
-  /* USER CODE END RTOS_EVENTS */
-
+    /* USER CODE END RTOS_EVENTS */
 }
 
 /* USER CODE BEGIN Header_AppStartTask */
@@ -157,16 +155,15 @@ void MX_FREERTOS_Init(void) {
 /* USER CODE END Header_AppStartTask */
 void AppStartTask(void *argument)
 {
-  /* USER CODE BEGIN AppStartTask */
+    /* USER CODE BEGIN AppStartTask */
     /* Infinite loop */
     for (;;) {
-        vTaskDelay(1);
-        }
-  /* USER CODE END AppStartTask */
+        Led_Test();
+    }
+    /* USER CODE END AppStartTask */
 }
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
 
 /* USER CODE END Application */
-

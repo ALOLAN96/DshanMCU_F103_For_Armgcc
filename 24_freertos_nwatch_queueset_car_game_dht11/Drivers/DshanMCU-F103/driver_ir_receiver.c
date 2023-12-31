@@ -42,7 +42,7 @@ static int g_KeysBuf_R, g_KeysBuf_W;
 static uint64_t g_IRReceiverIRQ_Timers[68];
 static int g_IRReceiverIRQ_Cnt = 0;
 
-static QueueHandle_t g_xQueueIrRcv; /* 红外遥控器队列 */
+static QueueHandle_t g_xQueueIrRcvHandle; /* 红外遥控器队列 */
 QueueHandle_t g_xQueues[10];
 static uint8_t g_queue_cnt = 0;
 
@@ -51,7 +51,7 @@ static uint8_t g_queue_cnt = 0;
 QueueHandle_t
 GetIrQueueHandle(void)
 {
-    return g_xQueueIrRcv;
+    return g_xQueueIrRcvHandle;
 }
 
 /* 辅助函数 */
@@ -140,9 +140,10 @@ static void Dispatchkey(IrRecvData *pIrRecvData)
     xQueueSendToBackFromISR(g_xQueueCar2Handle, &pIrRecvData, NULL);
     xQueueSendToBackFromISR(g_xQueueCar3Handle, &pIrRecvData, NULL);
 #endif
-    for (size_t i = 0; i < g_queue_cnt; i++) {
-        xQueueSendToBackFromISR(g_xQueues[i], pIrRecvData, &xHigherPriorityTaskWoken);
-    }
+    // for (size_t i = 0; i < g_queue_cnt; i++) {
+    //     xQueueSendToBackFromISR(g_xQueues[i], pIrRecvData, &xHigherPriorityTaskWoken);
+    // }
+    xQueueSendToBackFromISR(g_xQueueIrRcvHandle, pIrRecvData, &xHigherPriorityTaskWoken);
 
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
@@ -211,7 +212,7 @@ static int IRReceiver_IRQTimes_Parse(void)
     // 使用FreeRTOS队列的API完成消息的传输写队列
     irRecvData.dev = datas[0];
     irRecvData.val = datas[2];
-    // xQueueSendToBackFromISR(g_xQueueIrRcv, &irRecvData, NULL);
+    // xQueueSendToBackFromISR(g_xQueueIrRcvHandle, &irRecvData, NULL);
     Dispatchkey(&irRecvData);
     return 0;
 }
@@ -284,7 +285,7 @@ void IRReceiver_IRQ_Callback(void)
             /* 使用FreeRTOS队列的API完成消息的传输写队列 */
             irRecvData.dev = 0;
             irRecvData.val = 0;
-            // xQueueSendToBackFromISR(g_xQueueIrRcv, &irRecvData, NULL);
+            // xQueueSendToBackFromISR(g_xQueueIrRcvHandle, &irRecvData, NULL);
             Dispatchkey(&irRecvData);
             g_IRReceiverIRQ_Cnt = 0;
         }
@@ -315,8 +316,8 @@ void IRReceiver_Init(void)
     GPIO_InitStruct.Pull = GPIO_PULLUP;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 #endif
-    g_xQueueIrRcv = xQueueCreate(IR_QUEUE_LEN, sizeof(IrRecvData));
-    RegisterQueueHandle(g_xQueueIrRcv);
+    g_xQueueIrRcvHandle = xQueueCreate(IR_QUEUE_LEN, sizeof(IrRecvData));
+    // RegisterQueueHandle(g_xQueueIrRcvHandle);
 }
 
 /**********************************************************************

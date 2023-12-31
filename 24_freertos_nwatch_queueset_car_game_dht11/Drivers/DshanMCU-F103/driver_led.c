@@ -1,23 +1,25 @@
 /*  Copyright (s) 2019 深圳百问网科技有限公司
  *  All rights reserved
- * 
+ *
  * 文件名称：driver_led.c
  * 摘要：
- *  
+ *
  * 修改历史     版本号        Author       修改内容
  *--------------------------------------------------
  * 2023.8.03      v01         百问科技      创建文件
  *--------------------------------------------------
-*/
+ */
 
 #include "driver_led.h"
 #include "driver_timer.h"
 
 #include "gpio.h"
+#include "FreeRTOS.h"
+#include "task.h"
 
 /**********************************************************************
  * 函数名称： Led_Init
- * 功能描述： LED初始化函数, 在HAL的初始化代码里已经配置好了GPIO引脚, 
+ * 功能描述： LED初始化函数, 在HAL的初始化代码里已经配置好了GPIO引脚,
  *            所以本函数可以写为空
  *            但是为了不依赖于stm32cubemx, 此函数也实现了GPIO的配置
  * 输入参数： 无
@@ -30,7 +32,7 @@
 int Led_Init(void)
 {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
-    
+
     /* GPIO Ports Clock Enable */
     __HAL_RCC_GPIOC_CLK_ENABLE();
 
@@ -38,12 +40,12 @@ int Led_Init(void)
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
 
     /*Configure GPIO pin : PC13 */
-    GPIO_InitStruct.Pin = GPIO_PIN_13;
-    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Pin   = GPIO_PIN_13;
+    GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull  = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-    
+
     return 0;
 }
 
@@ -80,15 +82,13 @@ int Led_Control(int which, int on)
  ***********************************************************************/
 void Led_Test(void)
 {
-	Led_Init();
+    Led_Init();
 
-    while (1)
-    {
+    while (1) {
         Led_Control(LED_GREEN, 1);
-        mdelay(500);
+        vTaskDelay(500);
 
         Led_Control(LED_GREEN, 0);
-        mdelay(500);
+        vTaskDelay(500);
     }
 }
-
